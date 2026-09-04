@@ -160,15 +160,15 @@ FAQS = [
 
 GALLERY = [
     ("https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1200",
-     "Treatment suite with natural light and calibrated operatory lighting"),
+     "Operatory with overhead light and window"),
     ("https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=1000",
-     "Operatory set up for a restorative appointment"),
+     "Operatory set up for restorative work"),
     ("https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800",
-     "Reception lounge with quiet seating and material samples"),
+     "Reception lounge with seating"),
     ("https://images.unsplash.com/photo-1597764690523-15bea4c581c9?auto=format&fit=crop&q=80&w=800",
-     "Consultation desk with digital scan display"),
+     "Consultation desk with display"),
     ("https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=1000",
-     "Corridor view toward private operatories"),
+     "Corridor toward private operatories"),
     ("https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&q=80&w=800",
      "Sterilization room"),
 ]
@@ -576,7 +576,7 @@ def build_index():
         <div class="media media-wide">
           <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1000"
                width="800" height="600"
-               alt="A treatment room at the studio: chair, overhead light and a window facing Avenue of the Americas"
+               alt="A treatment room at the studio with a window facing Avenue of the Americas"
                fetchpriority="high">
         </div>
         <div class="float-card">
