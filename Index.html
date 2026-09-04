@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Alistair Vance | Precision Dentistry</title>
+
+    <!-- ═══ FONTS: Replaced Playfair+Jakarta with Instrument family ═══ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- ═══ REMOVED: Three.js + GSAP (replaced with CSS + IntersectionObserver) ═══ -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: {
+                    obsidian: '#0C0F14',
+                    graphite: '#1A1F2B',
+                    bone:     '#F7F5F2',
+                    cream:    '#FFFFFF',
+                    brass:    { DEFAULT:'#C8965A', light:'#E8D5B5', dark:'#A67A45', ghost:'rgba(200,150,90,0.08)' },
+                    stone:    { DEFAULT:'#6B6560', light:'#9B9590', dark:'#4A4540' },
+                    mist:     '#E8E4DF',
+                    inset:    '#F0ECE7',
+                },
+                fontFamily: {
+                    sans:  ['"Instrument Sans"','system-ui','sans-serif'],
+                    serif: ['"Instrument Serif"','Georgia','serif'],
+                },
+                fontSize: {
+                    'display-xl': ['clamp(3rem,6vw,5rem)',    { lineHeight:'1.0',  letterSpacing:'-0.03em' }],
+                    'display-lg': ['clamp(2.25rem,4vw,3.5rem)',{ lineHeight:'1.1',  letterSpacing:'-0.02em' }],
+                    'heading-lg': ['2rem',    { lineHeight:'1.25', letterSpacing:'-0.01em' }],
+                    'heading-md': ['1.5rem',  { lineHeight:'1.3',  letterSpacing:'-0.01em' }],
+                    'body-lg':    ['1.125rem',{ lineHeight:'1.6' }],
+                    'body-md':    ['1rem',    { lineHeight:'1.6' }],
+                    'body-sm':    ['0.875rem',{ lineHeight:'1.5' }],
+                    'label':      ['0.75rem', { lineHeight:'1.4',  letterSpacing:'0.05em' }],
+                },
+                borderRadius: { sm:'6px', md:'12px', lg:'16px' },
+                boxShadow: {
+                    subtle: '0 1px 2px rgba(12,15,20,0.04)',
+                    sm:     '0 2px 8px rgba(12,15,20,0.06)',
+                    md:     '0 8px 24px rgba(12,15,20,0.08)',
+                    lg:     '0 16px 48px rgba(12,15,20,0.10)',
+                    glow:   '0 0 32px rgba(200,150,90,0.15)',
+                },
+                transitionTimingFunction: {
+                    spring: 'cubic-bezier(0.16,1,0.3,1)',
+                    smooth: 'cubic-bezier(0.33,1,0.68,1)',
+                },
+            },
+        },
+    }
+    </script>
+
+    <style>
+        /* ═══════════════════════════════════════════
+           DESIGN SYSTEM TOKENS (CSS Custom Properties)
+           ═══════════════════════════════════════════ */
+        :root {
+            --color-bg:            #F7F5F2;
+            --color-bg-elevated:   #FFFFFF;
+            --color-bg-inset:      #F0ECE7;
+            --color-text-primary:  #0C0F14;
+            --color-text-secondary:#6B6560;
+            --color-text-tertiary: #9B9590;
+            --color-border:        #E8E4DF;
+            --color-accent:        #C8965A;
+            --color-accent-hover:  #A67A45;
+            --color-accent-subtle: #E8D5B5;
+            --color-accent-ghost:  rgba(200,150,90,0.08);
+            --color-dark-fill:     #0C0F14;
+            --color-dark-elevated: #1A1F2B;
+            --color-on-dark:       #F7F5F2;
+            --color-on-dark-muted: #9B9590;
+            --color-success:       #16A34A;
+            --color-error:         #DC2626;
+
+            --shadow-subtle: 0 1px 2px rgba(12,15,20,0.04);
+            --shadow-sm:     0 2px 8px rgba(12,15,20,0.06);
+            --shadow-md:     0 8px 24px rgba(12,15,20,0.08);
+            --shadow-lg:     0 16px 48px rgba(12,15,20,0.10);
+            --shadow-glow:   0 0 32px rgba(200,150,90,0.15);
+
+            --radius-sm:   6px;
+            --radius-md:   12px;
+            --radius-lg:   16px;
+            --radius-full: 9999px;
+
+            --ease-spring: cubic-bezier(0.16,1,0.3,1);
+            --ease-smooth: cubic-bezier(0.33,1,0.68,1);
+            --dur-fast:    150ms;
+            --dur-normal:  250ms;
+            --dur-slow:    400ms;
+            --dur-entrance:600ms;
+        }
+
+        .dark {
+            --color-bg:            #0C0F14;
+            --color-bg-elevated:   #1A1F2B;
+            --color-bg-inset:      #12151C;
+            --color-text-primary:  #F7F5F2;
+            --color-text-secondary:#9B9590;
+            --color-text-tertiary: #6B6560;
+            --color-border:        #2A2F3B;
+            --color-accent-hover:  #D4A76B;
+            --color-accent-subtle: #3D2E1A;
+            --shadow-subtle: 0 1px 2px rgba(0,0,0,0.20);
+            --shadow-sm:     0 2px 8px rgba(0,0,0,0.25);
+            --shadow-md:     0 8px 24px rgba(0,0,0,0.30);
+            --shadow-lg:     0 16px 48px rgba(0,0,0,0.35);
+            --shadow-glow:   0 0 32px rgba(200,150,90,0.20);
+        }
+
+        /* ═══ RESET & BASE ═══ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+        body {
+            font-family: 'Instrument Sans', system-ui, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            transition: background var(--dur-slow) var(--ease-smooth),
+                        color var(--dur-slow) var(--ease-smooth);
+        }
+        ::selection { background: var(--color-accent); color: #fff; }
+        img { display: block; max-width: 100%; height: auto; }
+        a { color: inherit; text-decoration: none; }
+        button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+
+        /* ═══ SKIP NAV (Accessibility) ═══ */
+        .skip-nav {
+            position: absolute; top: -100%; left: 16px; z-index: 9999;
+            padding: 8px 16px; background: var(--color-accent); color: #fff;
+            border-radius: var(--radius-sm); font-weight: 600; font-size: .875rem;
+        }
+        .skip-nav:focus { top: 16px; }
+
+        /* ═══ SCROLLBAR ═══ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-text-tertiary); }
+
+        /* ═══ REDUCED MOTION ═══ */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ═══ NAVBAR ═══ */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: 72px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; background: transparent;
+            transition: all var(--dur-normal) var(--ease-smooth);
+        }
+        .navbar.scrolled {
+            background: rgba(247,245,242,.85);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--color-border);
+            box-shadow: var(--shadow-subtle);
+        }
+        .dark .navbar.scrolled { background: rgba(12,15,20,.85); }
+
+        .nav-link {
+            font-size: .875rem; font-weight: 500; padding: 8px 0; position: relative;
+            color: var(--color-text-secondary);
+            transition: color var(--dur-normal) var(--ease-smooth);
+        }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 2px; background: var(--color-accent);
+            border-radius: 1px; transition: width var(--dur-normal) var(--ease-smooth);
+        }
+        .nav-link:hover { color: var(--color-text-primary); }
+        .nav-link:hover::after { width: 100%; }
+
+        /* ═══ BUTTONS ═══ */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; font-weight: 600; font-size: .875rem; line-height: 1;
+            border-radius: var(--radius-sm); white-space: nowrap;
+            transition: all var(--dur-normal) var(--ease-smooth);
+        }
+        .btn:active { transform: scale(.98); }
+        .btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+        .btn-primary {
+            background: var(--color-accent); color: #fff;
+            padding: 14px 28px; box-shadow: var(--shadow-subtle);
+        }
+        .btn-primary:hover {
+            background: var(--color-accent-hover);
+            box-shadow: var(--shadow-glow); transform: translateY(-1px);
+        }
+        .btn-primary:active { transform: translateY(0) scale(.98); }
+
+        .btn-secondary {
+            background: var(--color-bg-elevated); color: var(--color-text-primary);
+            padding: 14px 28px; border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-subtle);
+        }
+        .btn-secondary:hover { border-color: var(--color-accent); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+
+        .btn-dark {
+            background: var(--color-dark-fill); color: var(--color-on-dark);
+            padding: 14px 28px; box-shadow: var(--shadow-subtle);
+        }
+        .btn-dark:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+        .dark .btn-dark { background: var(--color-bg-elevated); }
+
+        .btn-ghost {
+            background: transparent; color: var(--color-text-primary); padding: 14px 28px;
+        }
+        .btn-ghost:hover { background: var(--color-accent-ghost); color: var(--color-accent); }
+
+        .btn-link { background: none; color: var(--color-accent); padding: 4px 0; font-weight: 600; gap: 6px; }
+        .btn-link:hover { gap: 10px; }
+
+        .btn-sm { padding: 10px 20px; font-size: .75rem; }
+        .btn-lg { padding: 18px 36px; font-size: 1rem; }
+        .btn-icon { width: 44px; height: 44px; padding: 0; border-radius: var(--radius-sm); }
+        .btn-icon.btn-sm { width: 36px; height: 36px; }
+
+        /* ═══ CARDS ═══ */
+        .card {
+            background: var(--color-bg-elevated); border: 1px solid var(--color-border);
+            border-radius: var(--radius-md); padding: 32px;
+            box-shadow: var(--shadow-subtle);
+            transition: all var(--dur-normal) var(--ease-smooth);
+        }
+        .card-interactive:hover {
+            transform: translateY(-4px); box-shadow: var(--shadow-md);
+            border-color: var(--color-accent-subtle);
+        }
+        .card-dark {
+            background: var(--color-dark-fill); border-color: transparent;
+            color: var(--color-on-dark);
+        }
+        .card-dark:hover { border-color: rgba(200,150,90,.2); }
+        .card-inset {
+            background: var(--color-bg-inset); border-color: transparent;
+            box-shadow: none;
+        }
+
+        /* ═══ BADGES ═══ */
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; font-size: .75rem; font-weight: 600;
+            letter-spacing: .02em; border-radius: var(--radius-full);
+            white-space: nowrap;
+        }
+        .badge-accent { background: var(--color-accent-ghost); color: var(--color-accent); border: 1px solid rgba(200,150,90,.15); }
+        .badge-success { background: rgba(22,163,74,.08); color: #15803D; border: 1px solid rgba(22,163,74,.15); }
+        .badge-error   { background: rgba(220,38,38,.08); color: #DC2626; border: 1px solid rgba(220,38,38,.15); }
+        .dark .badge-success { background: rgba(22,163,74,.15); color: #4ADE80; }
+        .dark .badge-error   { background: rgba(220,38,38,.15); color: #FCA5A5; }
+
+        /* ═══ ICON WRAPPER ═══ */
+        .icon-wrap {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: var(--radius-md); flex-shrink: 0;
+            transition: all var(--dur-normal) var(--ease-smooth);
+        }
+        .icon-wrap-accent { background: var(--color-accent-ghost); color: var(--color-accent); }
+        .icon-wrap-dark   { background: var(--color-dark-fill); color: var(--color-on-dark); }
+
+        /* ═══ SECTION LABEL ═══ */
+        .section-label {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: .75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: .05em;
+            color: var(--color-accent); margin-bottom: 16px;
+        }
+        .section-label::before {
+            content: ''; width: 24px; height: 2px;
+            background: var(--color-accent); border-radius: 1px;
+        }
+
+        /* ═══ IMAGE CONTAINER ═══ */
+        .img-container { overflow: hidden; border-radius: var(--radius-md); }
+        .img-container img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 700ms var(--ease-smooth);
+        }
+        .img-container:hover img { transform: scale(1.03); }
+
+        /* ═══ INPUTS ═══ */
+        .input {
+            width: 100%; padding: 12px 16px;
+            background: var(--color-bg-elevated); border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm); font-size: 1rem;
+            color: var(--color-text-primary);
+            transition: all var(--dur-normal) var(--ease-smooth);
+            box-shadow: var(--shadow-subtle);
+        }
+        .input::placeholder { color: var(--color-text-tertiary); }
+        .input:hover { border-color: var(--color-text-tertiary); }
+        .input:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-ghost); }
+        textarea.input { min-height: 120px; resize: vertical; }
+
+        /* ═══ THEME TOGGLE ═══ */
+        .theme-toggle {
+            width: 48px; height: 26px; border-radius: var(--radius-full);
+            background: var(--color-border); position: relative; cursor: pointer;
+            transition: background var(--dur-normal) var(--ease-smooth);
+        }
+        .theme-toggle::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 20px; height: 20px; border-radius: var(--radius-full);
+            background: var(--color-bg-elevated); box-shadow: var(--shadow-sm);
+            transition: transform var(--dur-normal) var(--ease-spring);
+        }
+        .dark .theme-toggle { background: var(--color-accent); }
+        .dark .theme-toggle::after { transform: translateX(22px); }
+        .toggle-icons {
+            position: absolute; inset: 0; display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 5px; pointer-events: none;
+        }
+        .toggle-icons .icon-sun, .toggle-icons .icon-moon {
+            width: 13px; height: 13px; transition: opacity var(--dur-normal);
+        }
+        .toggle-icons .icon-sun  { color: var(--color-accent); opacity: 1; }
+        .toggle-icons .icon-moon { color: #fff; opacity: .4; }
+        .dark .toggle-icons .icon-sun  { opacity: .4; }
+        .dark .toggle-icons .icon-moon { opacity: 1; }
+
+        /* ═══ MOBILE DRAWER ═══ */
+        .drawer-overlay {
+            position: fixed; inset: 0; background: rgba(12,15,20,.5);
+            z-index: 200; opacity: 0; visibility: hidden;
+            transition: all var(--dur-slow) var(--ease-smooth);
+        }
+        .drawer-overlay.open { opacity: 1; visibility: visible; }
+        .drawer {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: 320px; max-width: 85vw;
+            background: var(--color-bg-elevated); z-index: 201;
+            padding: 24px; transform: translateX(100%);
+            transition: transform var(--dur-slow) var(--ease-spring);
+            box-shadow: var(--shadow-lg);
+            display: flex; flex-direction: column;
+        }
+        .drawer.open { transform: translateX(0); }
+
+        /* ═══ BOOKING MODAL ═══ */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(12,15,20,.6);
+            backdrop-filter: blur(4px); z-index: 300;
+            opacity: 0; visibility: hidden;
+            transition: all var(--dur-slow) var(--ease-smooth);
+            display: flex; align-items: center; justify-content: center; padding: 24px;
+        }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--color-bg-elevated); border-radius: var(--radius-lg);
+            padding: 40px; max-width: 520px; width: 100%;
+            box-shadow: var(--shadow-lg); border: 1px solid var(--color-border);
+            transform: translateY(20px) scale(.97);
+            transition: transform var(--dur-slow) var(--ease-spring);
+        }
+        .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+        /* ═══ SCROLL REVEAL ═══ */
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity var(--dur-entrance) var(--ease-spring),
+                        transform var(--dur-entrance) var(--ease-spring);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
+        .stagger > .reveal:nth-child(2) { transition-delay: 100ms; }
+        .stagger > .reveal:nth-child(3) { transition-delay: 200ms; }
+        .stagger > .reveal:nth-child(4) { transition-delay: 300ms; }
+        .stagger > .reveal:nth-child(5) { transition-delay: 400ms; }
+
+        /* ═══ GRAIN TEXTURE ═══ */
+        .grain::before {
+            content: ''; position: absolute; inset: 0; opacity: .02;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ═══ MAP ═══ */
+        .map-container {
+            height: 300px; width: 100%; border-radius: var(--radius-md);
+            overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);
+        }
+        @media(min-width:768px) { .map-container { height: 420px; } }
+
+        /* ═══ HERO GRADIENT ═══ */
+        .hero-glow {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(200,150,90,.12) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: 0;
+            top: -10%; right: -10%;
+        }
+        .dark .hero-glow { opacity: .4; }
+
+        /* ═══ STAR RATING ═══ */
+        .star-filled { color: #D4A76B; fill: #D4A76B; }
+
+        /* ═══ DIVIDER ═══ */
+        .divider { width: 100%; height: 1px; background: var(--color-border); border: none; }
+    </style>
+</head>
+
+<body>
+    <!-- ═══ ACCESSIBILITY: Skip navigation link ═══ -->
+    <a href="#main-content" class="skip-nav">Skip to content</a>
+
+    <!-- ═══ NAVBAR — Transparent → blurred on scroll ═══ -->
+    <nav class="navbar" id="navbar" aria-label="Main navigation">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 flex items-center justify-center rounded-sm" style="background:var(--color-accent);color:#fff;">
+                <i data-lucide="gem" class="w-4 h-4" aria-hidden="true"></i>
+            </div>
+            <span class="text-body-sm font-bold tracking-tight">VANCE<span style="color:var(--color-accent);">DENTAL</span></span>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-6">
+            <a href="#home"     class="nav-link">Home</a>
+            <a href="#services" class="nav-link">Services</a>
+            <a href="#gallery"  class="nav-link">Gallery</a>
+            <a href="#location" class="nav-link">Visit Us</a>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" role="switch" aria-checked="false">
+                <span class="toggle-icons">
+                    <i data-lucide="sun" class="icon-sun" aria-hidden="true"></i>
+                    <i data-lucide="moon" class="icon-moon" aria-hidden="true"></i>
+                </span>
+            </button>
+            <button class="btn btn-primary btn-sm hidden md:inline-flex" id="bookBtnNav" aria-haspopup="dialog">
+                Book Appointment
+            </button>
+            <button class="btn-icon btn-ghost lg:hidden" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5" aria-hidden="true"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══ MOBILE DRAWER — Real functional menu ═══ -->
+    <div class="drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+    <aside class="drawer" id="drawer" role="dialog" aria-label="Mobile menu" aria-hidden="true">
+        <div class="flex justify-between items-center mb-8">
+            <span class="text-body-sm font-bold">Menu</span>
+            <button class="btn-icon btn-ghost btn-sm" id="drawerClose" aria-label="Close menu">
+                <i data-lucide="x" class="w-5 h-5" aria-hidden="true"></i>
+            </button>
+        </div>
+        <nav class="flex flex-col gap-1 flex-1">
+            <a href="#home"     class="btn btn-ghost" style="justify-content:flex-start;">Home</a>
+            <a href="#services" class="btn btn-ghost" style="justify-content:flex-start;">Services</a>
+            <a href="#gallery"  class="btn btn-ghost" style="justify-content:flex-start;">Gallery</a>
+            <a href="#location" class="btn btn-ghost" style="justify-content:flex-start;">Visit Us</a>
+        </nav>
+        <hr class="divider my-4">
+        <button class="btn btn-primary w-full book-trigger">Book Appointment</button>
+    </aside>
+
+    <!-- ═══ BOOKING MODAL — The site's primary conversion ═══ -->
+    <div class="modal-overlay" id="bookingModal" role="dialog" aria-modal="true" aria-label="Book an appointment" aria-hidden="true">
+        <div class="modal">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="font-serif text-heading-lg">Book a Visit</h2>
+                    <p class="text-body-sm mt-1" style="color:var(--color-text-secondary);">We'll confirm within 24 hours.</p>
+                </div>
+                <button class="btn-icon btn-ghost btn-sm" id="modalClose" aria-label="Close modal">
+                    <i data-lucide="x" class="w-5 h-5" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form class="flex flex-col gap-4" onsubmit="event.preventDefault();">
+                <div class="flex flex-col gap-1">
+                    <label for="book-name" class="text-body-sm font-semibold">Full Name</label>
+                    <input id="book-name" type="text" class="input" placeholder="Your name" required>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="book-email" class="text-body-sm font-semibold">Email</label>
+                    <input id="book-email" type="email" class="input" placeholder="you@email.com" required>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="book-phone" class="text-body-sm font-semibold">Phone</label>
+                    <input id="book-phone" type="tel" class="input" placeholder="+1 (212) 555-0198">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="book-service" class="text-body-sm font-semibold">Service</label>
+                    <select id="book-service" class="input" style="appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6560' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 12px center;padding-right:40px;">
+                        <option value="" disabled selected>Select a service…</option>
+                        <option>Cosmetic Dentistry</option>
+                        <option>Dental Implants</option>
+                        <option>Invisalign®</option>
+                        <option>General Checkup</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-full mt-2">
+                    Confirm Booking <i data-lucide="check" class="w-4 h-4" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT — Proper landmark ═══ -->
+    <main id="main-content">
+
+        <!-- ═══ HERO — Replaced Three.js with CSS gradient glow ═══ -->
+        <section id="home" class="relative min-h-screen flex items-center grain" style="padding:160px 24px 96px;">
+            <div class="hero-glow" aria-hidden="true"></div>
+
+            <div class="max-w-[1200px] mx-auto relative z-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
+                <!-- Left column -->
+                <div class="stagger">
+                    <div class="reveal">
+                        <span class="section-label">Precision Dental Care in New York</span>
+                    </div>
+
+                    <h1 class="font-serif text-display-xl reveal" style="max-width:12ch;">
+                        Modern <span style="color:var(--color-accent);">precision</span> dentistry.
+                    </h1>
+
+                    <p class="text-body-lg mt-6 reveal" style="color:var(--color-text-secondary);max-width:48ch;">
+                        Experience world-class dental expertise with Dr.&nbsp;Alistair&nbsp;Vance. Cutting-edge technology meets a gentle, patient-first approach.
+                    </p>
+
+                    <div class="flex flex-wrap gap-3 mt-10 reveal">
+                        <button class="btn btn-primary btn-lg book-trigger">
+                            <i data-lucide="calendar" class="w-4 h-4" aria-hidden="true"></i> Schedule Visit
+                        </button>
+                        <a href="#gallery" class="btn btn-secondary btn-lg">
+                            View Gallery <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                    <!-- Social proof -->
+                    <div class="mt-12 flex items-center gap-4 reveal">
+                        <div class="flex" style="margin-left:0;">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full border-2 object-cover" style="border-color:var(--color-bg);" alt="Patient photo" loading="lazy">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full border-2 object-cover -ml-2" style="border-color:var(--color-bg);" alt="Patient photo" loading="lazy">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full border-2 object-cover -ml-2" style="border-color:var(--color-bg);" alt="Patient photo" loading="lazy">
+                        </div>
+                        <div>
+                            <p class="text-body-sm font-semibold">5,000+ happy smiles</p>
+                            <div class="flex items-center gap-1.5">
+                                <div class="flex" role="img" aria-label="Rating: 4.9 out of 5 stars">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 star-filled" aria-hidden="true"></i>
+                                    <i data-lucide="star" class="w-3.5 h-3.5 star-filled" aria-hidden="true"></i>
+                                    <i data-lucide="star" class="w-3.5 h-3.5 star-filled" aria-hidden="true"></i>
+                                    <i data-lucide="star" class="w-3.5 h-3.5 star-filled" aria-hidden="true"></i>
+                                    <i data-lucide="star" class="w-3.5 h-3.5 star-filled" aria-hidden="true"></i>
+                                </div>
+                                <span class="text-label" style="color:var(--color-text-tertiary);">4.9/5 · 800+ reviews</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right column — Hero image (visible on all sizes now) -->
+                <div class="relative reveal">
+                    <div class="img-container" style="border-radius:var(--radius-lg);">
+                        <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800" alt="Interior of Vance Dental Studio showing modern treatment room" loading="eager" style="aspect-ratio:4/3;">
+                    </div>
+                    <!-- Floating stat card — now positioned cleanly -->
+                    <div class="card absolute -bottom-6 -left-4 md:-left-8 z-20 flex items-center gap-3" style="padding:16px 20px;max-width:220px;">
+                        <div class="icon-wrap icon-wrap-accent" style="width:40px;height:40px;">
+                            <i data-lucide="zap" class="w-4 h-4" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <p class="text-body-sm font-semibold">2× faster healing</p>
+                            <p class="text-label" style="color:var(--color-text-tertiary);">Laser techniques</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ═══ SERVICES ═══ -->
+        <section id="services" style="padding:96px 24px;background:var(--color-bg);" aria-labelledby="services-heading">
+            <div class="max-w-[1200px] mx-auto">
+                <div class="reveal">
+                    <span class="section-label">What We Do</span>
+                </div>
+                <h2 id="services-heading" class="font-serif text-display-lg mb-4 reveal">World-class services</h2>
+                <p class="text-body-md mb-12 reveal" style="color:var(--color-text-secondary);max-width:48ch;">
+                    From routine care to complex restorations, every procedure reflects meticulous precision and artistry.
+                </p>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 stagger">
+                    <!-- Service 1 -->
+                    <article class="card card-interactive reveal" role="article">
+                        <div class="icon-wrap icon-wrap-accent mb-6">
+                            <i data-lucide="sparkles" class="w-5 h-5" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-heading-md font-semibold mb-3">Cosmetic Dentistry</h3>
+                        <p class="text-body-sm mb-6" style="color:var(--color-text-secondary);">
+                            Transform your smile with veneers, whitening, and bonding using the latest aesthetic techniques.
+                        </p>
+                        <button class="btn btn-link" style="padding:0;">
+                            Learn more <i data-lucide="chevron-right" class="w-4 h-4" aria-hidden="true"></i>
+                        </button>
+                    </article>
+
+                    <!-- Service 2 — Dark card for visual hierarchy -->
+                    <article class="card card-dark card-interactive reveal" role="article">
+                        <div class="icon-wrap mb-6" style="background:rgba(200,150,90,.12);color:var(--color-accent);">
+                            <i data-lucide="layers" class="w-5 h-5" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-heading-md font-semibold mb-3">Dental Implants</h3>
+                        <p class="text-body-sm mb-6" style="color:var(--color-on-dark-muted);">
+                            3D-guided implant placement for permanent, natural-looking tooth replacement with precision.
+                        </p>
+                        <button class="btn btn-link" style="padding:0;">
+                            Learn more <i data-lucide="chevron-right" class="w-4 h-4" aria-hidden="true"></i>
+                        </button>
+                    </article>
+
+                    <!-- Service 3 -->
+                    <article class="card card-interactive reveal" role="article">
+                        <div class="icon-wrap icon-wrap-accent mb-6">
+                            <i data-lucide="scan" class="w-5 h-5" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-heading-md font-semibold mb-3">Invisalign®</h3>
+                        <p class="text-body-sm mb-6" style="color:var(--color-text-secondary);">
+                            Straighten teeth discreetly with custom clear aligners and computerized treatment planning.
+                        </p>
+                        <button class="btn btn-link" style="padding:0;">
+                            Learn more <i data-lucide="chevron-right" class="w-4 h-4" aria-hidden="true"></i>
+                        </button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ═══ GALLERY ═══ -->
+        <section id="gallery" style="padding:96px 24px;background:var(--color-bg-inset);" aria-labelledby="gallery-heading">
+            <div class="max-w-[1200px] mx-auto">
+                <div class="reveal">
+                    <span class="section-label">Inside the Studio</span>
+                </div>
+                <h2 id="gallery-heading" class="font-serif text-display-lg mb-4 reveal">The Vance experience</h2>
+                <p class="text-body-md mb-12 reveal" style="color:var(--color-text-secondary);max-width:48ch;">
+                    A modern boutique clinic designed for your comfort and relaxation.
+                </p>
+
+                <!-- Gallery grid — removed fake carousel arrows -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 stagger">
+                    <div class="img-container col-span-2 row-span-2 reveal" style="min-height:280px;">
+                        <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800" alt="Modern dental equipment and treatment room" loading="lazy">
+                    </div>
+                    <div class="img-container reveal" style="min-height:180px;">
+                        <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=600" alt="Bright and welcoming clinic lobby" loading="lazy">
+                    </div>
+                    <div class="img-container reveal" style="min-height:180px;">
+                        <img src="https://images.unsplash.com/photo-1597764690523-15bea4c581c9?auto=format&fit=crop&q=80&w=600" alt="Patient receiving gentle dental care" loading="lazy">
+                    </div>
+                    <div class="img-container col-span-2 reveal" style="min-height:180px;">
+                        <img src="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=800" alt="Professional consultation with Dr. Vance" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ═══ VISIT US / CONTACT & MAP ═══ -->
+        <section id="location" style="padding:96px 24px;" aria-labelledby="location-heading">
+            <div class="max-w-[1200px] mx-auto">
+                <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+                    <!-- Info column -->
+                    <div>
+                        <div class="reveal">
+                            <span class="section-label">Find Us</span>
+                        </div>
+                        <h2 id="location-heading" class="font-serif text-display-lg mb-8 reveal">Visit our studio</h2>
+
+                        <div class="flex flex-col gap-8 stagger">
+                            <!-- Address -->
+                            <div class="flex items-start gap-4 reveal">
+                                <div class="icon-wrap icon-wrap-accent">
+                                    <i data-lucide="map-pin" class="w-5 h-5" aria-hidden="true"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-body-md font-semibold mb-1">Location</h3>
+                                    <p class="text-body-sm" style="color:var(--color-text-secondary);">
+                                        1200 Avenue of the Americas, Suite 400<br>New York, NY 10036
+                                    </p>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination=40.758896,-73.985130" target="_blank" rel="noopener noreferrer" class="btn btn-link mt-2" style="font-size:.8rem;">
+                                        Get Directions <i data-lucide="external-link" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Hours -->
+                            <div class="flex items-start gap-4 reveal">
+                                <div class="icon-wrap icon-wrap-accent">
+                                    <i data-lucide="clock" class="w-5 h-5" aria-hidden="true"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h3 class="text-body-md font-semibold">Opening Hours</h3>
+                                        <span id="status-badge" class="badge badge-success" role="status">Open Now</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-y-2 text-body-sm">
+                                        <span style="color:var(--color-text-tertiary);">Monday – Friday</span>
+                                        <span class="text-right font-medium">08:00 AM – 07:00 PM</span>
+                                        <span style="color:var(--color-text-tertiary);">Saturday</span>
+                                        <span class="text-right font-medium">09:00 AM – 04:00 PM</span>
+                                        <span style="color:var(--color-text-tertiary);">Sunday</span>
+                                        <span class="text-right font-medium" style="color:var(--color-error);">Closed</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact -->
+                            <div class="flex items-start gap-4 reveal">
+                                <div class="icon-wrap icon-wrap-accent">
+                                    <i data-lucide="phone" class="w-5 h-5" aria-hidden="true"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-body-md font-semibold mb-1">Contact</h3>
+                                    <p class="text-body-sm font-medium" style="color:var(--color-text-secondary);">
+                                        <a href="tel:+12125550198" style="color:var(--color-text-primary);">+1 (212) 555-0198</a>
+                                    </p>
+                                    <p class="text-body-sm" style="color:var(--color-text-secondary);">
+                                        <a href="mailto:hello@vancedental.com">hello@vancedental.com</a>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- CTA -->
+                            <div class="reveal">
+                                <button class="btn btn-primary btn-lg book-trigger">
+                                    <i data-lucide="calendar" class="w-4 h-4" aria-hidden="true"></i> Book an Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map column -->
+                    <div class="reveal">
+                        <div id="map" class="map-container" role="application" aria-label="Map showing clinic location"></div>
+                        <div class="card mt-4 flex items-start gap-3" style="padding:16px 20px;">
+                            <i data-lucide="car" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color:var(--color-accent);" aria-hidden="true"></i>
+                            <p class="text-body-sm" style="color:var(--color-text-secondary);">
+                                <strong style="color:var(--color-text-primary);">Pro tip:</strong> We offer validated parking for all patients at the 43rd Street garage.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ═══ FOOTER — Tightened, less overwhelming ═══ -->
+    <footer style="background:var(--color-dark-fill);color:var(--color-on-dark);padding:80px 24px 40px;" role="contentinfo">
+        <div class="max-w-[1200px] mx-auto">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <!-- Brand -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-sm" style="background:var(--color-accent);color:#fff;">
+                            <i data-lucide="gem" class="w-4 h-4" aria-hidden="true"></i>
+                        </div>
+                        <span class="text-body-sm font-bold tracking-tight">VANCE<span style="color:var(--color-accent);">DENTAL</span></span>
+                    </div>
+                    <p class="text-body-sm" style="color:var(--color-on-dark-muted);max-width:36ch;line-height:1.7;">
+                        Setting a new standard for dental health with a fusion of artistry, technology, and empathy. Your smile is our masterwork.
+                    </p>
+                    <div class="flex gap-3 mt-6">
+                        <a href="#" class="btn-icon btn-sm flex items-center justify-center rounded-sm" style="background:rgba(255,255,255,.07);color:var(--color-on-dark-muted);width:36px;height:36px;" aria-label="Instagram">
+                            <i data-lucide="instagram" class="w-4 h-4" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="btn-icon btn-sm flex items-center justify-center rounded-sm" style="background:rgba(255,255,255,.07);color:var(--color-on-dark-muted);width:36px;height:36px;" aria-label="Facebook">
+                            <i data-lucide="facebook" class="w-4 h-4" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="btn-icon btn-sm flex items-center justify-center rounded-sm" style="background:rgba(255,255,255,.07);color:var(--color-on-dark-muted);width:36px;height:36px;" aria-label="LinkedIn">
+                            <i data-lucide="linkedin" class="w-4 h-4" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="text-body-sm font-bold mb-4" style="color:var(--color-accent);">Quick Links</h4>
+                    <nav aria-label="Footer navigation">
+                        <ul class="flex flex-col gap-3 text-body-sm" style="color:var(--color-on-dark-muted);list-style:none;">
+                            <li><a href="#" class="hover:text-white transition">About Dr. Vance</a></li>
+                            <li><a href="#" class="hover:text-white transition">Patient Forms</a></li>
+                            <li><a href="#" class="hover:text-white transition">Insurance Info</a></li>
+                            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h4 class="text-body-sm font-bold mb-4" style="color:var(--color-accent);">Newsletter</h4>
+                    <p class="text-body-sm mb-4" style="color:var(--color-on-dark-muted);">Oral health tips and clinic updates.</p>
+                    <form class="flex gap-2" onsubmit="event.preventDefault();" aria-label="Newsletter signup">
+                        <label for="footer-email" class="sr-only">Email address</label>
+                        <input id="footer-email" type="email" class="input flex-1" placeholder="Email address" required style="background:var(--color-dark-elevated);border-color:rgba(255,255,255,.1);color:var(--color-on-dark);font-size:.875rem;padding:10px 14px;">
+                        <button type="submit" class="btn btn-primary btn-sm" aria-label="Subscribe">
+                            <i data-lucide="arrow-right" class="w-4 h-4" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <hr class="divider" style="background:rgba(255,255,255,.08);">
+            <p class="text-center text-label mt-6" style="color:var(--color-on-dark-muted);">
+                &copy; 2025 Vance Dental Studio. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+
+    <!-- ═══════════════════════════════════════════
+         JAVASCRIPT — All logic consolidated
+         ═══════════════════════════════════════════ -->
+    <script>
+        // ─── Initialize Lucide icons ───
+        lucide.createIcons();
+
+        // ─── DARK MODE ───
+        const html = document.documentElement;
+        const toggle = document.getElementById('themeToggle');
+
+        function getPreferred() {
+            const stored = localStorage.getItem('vd-theme');
+            if (stored) return stored;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        function applyTheme(t) {
+            html.classList.remove('light','dark');
+            html.classList.add(t);
+            toggle.setAttribute('aria-checked', t === 'dark');
+            localStorage.setItem('vd-theme', t);
+        }
+        applyTheme(getPreferred());
+        toggle.addEventListener('click', () => applyTheme(html.classList.contains('dark') ? 'light' : 'dark'));
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('vd-theme')) applyTheme(e.matches ? 'dark' : 'light');
+        });
+
+        // ─── NAVBAR SCROLL ───
+        const navbar = document.getElementById('navbar');
+        function handleScroll() { navbar.classList.toggle('scrolled', window.scrollY > 32); }
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+
+        // ─── MOBILE DRAWER ───
+        const menuBtn      = document.getElementById('menuBtn');
+        const drawer        = document.getElementById('drawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const drawerClose   = document.getElementById('drawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+            drawer.setAttribute('aria-hidden', 'false');
+            menuBtn.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+            drawerClose.focus();
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+            drawer.setAttribute('aria-hidden', 'true');
+            menuBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuBtn.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeModal(); } });
+
+        // ─── BOOKING MODAL ───
+        const modal = document.getElementById('bookingModal');
+        const modalClose = document.getElementById('modalClose');
+
+        function openModal() {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            closeDrawer();
+            modal.querySelector('input')?.focus();
+        }
+        function closeModal() {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+        // All book triggers
+        document.querySelectorAll('.book-trigger, #bookBtnNav').forEach(btn => {
+            btn.addEventListener('click', openModal);
+        });
+
+        // ─── SCROLL REVEAL (IntersectionObserver — replaces GSAP) ───
+        const revealEls = document.querySelectorAll('.reveal');
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReduced) {
+            revealEls.forEach(el => el.classList.add('visible'));
+        } else {
+            const revealObs = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        revealObs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            revealEls.forEach(el => revealObs.observe(el));
+        }
+
+        // ─── ACTIVE NAV LINK ───
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sectionObs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    navLinks.forEach(link => {
+                        const isActive = link.getAttribute('href') === `#${id}`;
+                        link.classList.toggle('active', isActive);
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+        sections.forEach(s => sectionObs.observe(s));
+
+        // ─── LEAFLET MAP — Removed click-hijack ───
+        const map = L.map('map', {
+            scrollWheelZoom: false   /* Prevent accidental scroll-zoom on mobile */
+        }).setView([40.758896, -73.985130], 15);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        }).addTo(map);
+
+        const customIcon = L.divIcon({
+            html: `<div style="width:32px;height:32px;background:var(--color-accent);border-radius:50%;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                   </div>`,
+            className: '',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
+        });
+
+        L.marker([40.758896, -73.985130], { icon: customIcon })
+         .addTo(map)
+         .bindPopup(`<div style="font-family:'Instrument Sans',sans-serif;"><strong>Vance Dental Studio</strong><br><span style="font-size:.8em;color:#6B6560;">1200 Ave of Americas</span></div>`)
+         .openPopup();
+
+        // ─── OPENING STATUS ───
+        function updateStatus() {
+            const now = new Date();
+            const day = now.getDay(), hour = now.getHours();
+            const badge = document.getElementById('status-badge');
+            let isOpen = false;
+            if (day >= 1 && day <= 5 && hour >= 8 && hour < 19) isOpen = true;
+            if (day === 6 && hour >= 9 && hour < 16) isOpen = true;
+
+            badge.textContent = isOpen ? 'Open Now' : 'Closed Now';
+            badge.className = `badge ${isOpen ? 'badge-success' : 'badge-error'}`;
+        }
+        updateStatus();
+        setInterval(updateStatus, 60000);
+    </script>
+</body>
+</html>
