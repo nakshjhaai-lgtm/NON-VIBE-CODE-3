@@ -1,0 +1,18 @@
+# Vance Dental Studio
+
+> Precision dentistry studio in Midtown Manhattan led by Dr. Alistair Vance.
+
+## Site
+- Home: https://vancedental.com/
+- Services: https://vancedental.com/services.html
+- Case studies: https://vancedental.com/cases.html
+- Visit / map: https://vancedental.com/visit.html
+- Contact: https://vancedental.com/contact.html
+- Privacy: https://vancedental.com/privacy.html
+
+## Facts
+- Address: 1200 Avenue of the Americas, Suite 400, New York, NY 10036
+- Phone: +1 (212) 555-0198
+- Email: hello@vancedental.com
+- Hours: Mon–Fri 08:00–19:00; Sat 09:00–16:00; Sun closed
+- Services: Cosmetic dentistry, dental implants, Invisalign, general checkup

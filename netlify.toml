@@ -1,0 +1,14 @@
+[build]
+  publish = "."
+  command = "echo 'Static site, no build step'"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Forms
+[build.processing]
+  skip_processing = false
