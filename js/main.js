@@ -1,4 +1,4 @@
-/* Vance Dental Studio — site behaviors */
+/* Vance Dental Studio: site behaviors */
 (function () {
   "use strict";
 
@@ -198,7 +198,7 @@
     });
   });
 
-  /* FAQ accordion (details) — ensure only one open optional */
+  /* FAQ accordion (details): keep only one open, optional */
   $$("[data-faq] details").forEach((d) => {
     d.addEventListener("toggle", () => {
       if (d.open) {
@@ -319,34 +319,34 @@
   const searchInput = $("[data-site-search]");
   const searchResults = $("[data-search-results]");
   const SEARCH_INDEX = [
-    { title: "Cosmetic Dentistry", url: "services.html#cosmetic", body: "Veneers, whitening, and bonding with aesthetic planning." },
-    { title: "Dental Implants", url: "services.html#implants", body: "3D-guided implant placement for permanent tooth replacement." },
-    { title: "Invisalign", url: "services.html#invisalign", body: "Custom clear aligners with computerized treatment planning." },
-    { title: "General Checkup", url: "services.html#checkup", body: "Preventive exams, cleanings, and long-term oral health." },
-    { title: "Book an appointment", url: "contact.html", body: "Schedule a visit. We confirm within 24 hours." },
+    { title: "Cosmetic dentistry", url: "services.html#cosmetic", body: "Veneers, bonding and whitening. Shade matched to your own enamel, with a mock-up before any tooth is prepared." },
+    { title: "Dental implants", url: "services.html#implants", body: "Planned on a CBCT scan and placed through a printed surgical guide. Single tooth to full arch." },
+    { title: "Invisalign", url: "services.html#invisalign", body: "Clear aligners staged from an intraoral scan. Check-ups every six to eight weeks, one refinement phase included." },
+    { title: "General checkup", url: "services.html#checkup", body: "Exams and cleanings with periodontal charting at every visit. X-rays only when a finding needs following up." },
+    { title: "Book an appointment", url: "contact.html", body: "Ask for a date by form or phone. Requests are answered within 24 hours." },
     { title: "Studio location", url: "visit.html", body: "1200 Avenue of the Americas, Suite 400, New York, NY 10036." },
-    { title: "Opening hours", url: "visit.html#hours", body: "Monday to Friday 08:00–19:00. Saturday 09:00–16:00. Sunday closed." },
-    { title: "Patient forms", url: "patients.html", body: "New patient paperwork, insurance, and visit preparation." },
-    { title: "Insurance information", url: "patients.html#insurance", body: "Plans we work with and financing options." },
-    { title: "Privacy Policy", url: "privacy.html", body: "How Vance Dental Studio handles personal data." },
-    { title: "Terms of Service", url: "terms.html", body: "Terms governing use of this website and clinic services." },
-    { title: "Gallery", url: "gallery.html", body: "Inside the boutique clinic on Avenue of the Americas." },
-    { title: "About Dr. Alistair Vance", url: "about.html", body: "Precision dentistry guided by artistry, technology, and empathy." },
-    { title: "FAQs", url: "index.html#faq", body: "Common questions about visits, comfort, and treatment." },
-    { title: "Case studies", url: "cases.html", body: "Documented treatment outcomes from the studio." },
+    { title: "Opening hours", url: "visit.html#hours", body: "Monday to Friday 08:00-19:00. Saturday 09:00-16:00. Sunday closed." },
+    { title: "Patient forms", url: "patients.html", body: "New-patient paperwork sent by secure link after booking, or filled in at reception 15 minutes early." },
+    { title: "Insurance information", url: "patients.html#insurance", body: "Out-of-network with most PPO plans. The office files the claim. HSA and FSA cards accepted." },
+    { title: "Privacy Policy", url: "privacy.html", body: "What the site collects, who it is shared with, cookie settings and how to request a copy." },
+    { title: "Terms of Service", url: "terms.html", body: "Rules for using the website, booking requests, site content and liability." },
+    { title: "Gallery", url: "gallery.html", body: "Photographs of the treatment rooms, waiting room and sterilization area on Avenue of the Americas." },
+    { title: "About Dr. Alistair Vance", url: "about.html", body: "DDS, restorative and implant dentistry, 18 years in practice. One address, no second location." },
+    { title: "FAQs", url: "index.html#faq", body: "How soon you can be seen, insurance, access, what to bring, sedation and parking." },
+    { title: "Case studies", url: "cases.html", body: "Three write-ups: veneers after grinding wear, a guided lower molar implant, aligners for adult crowding." },
   ];
   function renderSearch(q) {
     if (!searchResults) return;
     const query = (q || "").trim().toLowerCase();
     if (!query) {
-      searchResults.innerHTML = `<div class="search-empty">Start typing to search services, visit info, and policies.</div>`;
+      searchResults.innerHTML = `<div class="search-empty">Start typing to search the site.</div>`;
       return;
     }
     const hits = SEARCH_INDEX.filter((item) =>
       (item.title + " " + item.body).toLowerCase().includes(query)
     ).slice(0, 8);
     if (!hits.length) {
-      searchResults.innerHTML = `<div class="search-empty">No matches for “${escapeHtml(q)}”. Try “implants”, “hours”, or “insurance”.</div>`;
+      searchResults.innerHTML = `<div class="search-empty">No matches for "${escapeHtml(q)}". Try "implants", "hours" or "insurance".</div>`;
       return;
     }
     searchResults.innerHTML = hits.map((h) => `
