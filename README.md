@@ -25,3 +25,18 @@ Open http://localhost:8080
 - `js/main.js`, interactions
 - `netlify.toml`, `_headers`, `_redirects`, Netlify config
 - `sitemap.xml`, `robots.txt`, `llms.txt`, SEO / AI discovery
+
+## Canonical host
+
+`SITE_URL` at the top of `build_pages.py` is the single source for every
+absolute URL the site emits (canonical, `og:url`, `twitter:image`, JSON-LD,
+`sitemap.xml`, `robots.txt`, `llms.txt`). It currently points at the Netlify
+host the site is served from, so the markup never advertises a domain the
+visitor did not arrive on. When a custom domain is attached, change that one
+line and re-run the generator.
+
+## Copy rules
+
+Page text follows `COPY_GUIDE.md`, which applies
+[Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
+to marketing copy. Read it before editing any string in `build_pages.py`.

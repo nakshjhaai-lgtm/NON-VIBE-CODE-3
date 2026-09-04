@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vancedental.com/sitemap.xml
+Sitemap: https://vance-dental.netlify.app/sitemap.xml

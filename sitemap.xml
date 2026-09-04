@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://vancedental.com/</loc>
+    <loc>https://vance-dental.netlify.app/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/services.html</loc>
+    <loc>https://vance-dental.netlify.app/services.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/gallery.html</loc>
+    <loc>https://vance-dental.netlify.app/gallery.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/cases.html</loc>
+    <loc>https://vance-dental.netlify.app/cases.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/about.html</loc>
+    <loc>https://vance-dental.netlify.app/about.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/visit.html</loc>
+    <loc>https://vance-dental.netlify.app/visit.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/patients.html</loc>
+    <loc>https://vance-dental.netlify.app/patients.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/contact.html</loc>
+    <loc>https://vance-dental.netlify.app/contact.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/search.html</loc>
+    <loc>https://vance-dental.netlify.app/search.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/privacy.html</loc>
+    <loc>https://vance-dental.netlify.app/privacy.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/terms.html</loc>
+    <loc>https://vance-dental.netlify.app/terms.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://vancedental.com/thank-you.html</loc>
+    <loc>https://vance-dental.netlify.app/thank-you.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>

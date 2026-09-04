@@ -4,22 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Contact | Vance Dental Studio</title>
-  <meta name="description" content="Contact Vance Dental Studio in Midtown Manhattan. Book a visit or send a message, we respond within 24 hours.">
+  <meta name="description" content="Message or call Vance Dental Studio at 1200 Avenue of the Americas, Suite 400, New York. Replies within 24 hours on business days.">
   <meta name="theme-color" content="#F3F0EA">
   <meta name="color-scheme" content="light dark">
-  <link rel="canonical" href="https://vancedental.com/contact.html">
+  <link rel="canonical" href="https://vance-dental.netlify.app/contact.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Vance Dental Studio">
   <meta property="og:title" content="Contact | Vance Dental Studio">
-  <meta property="og:description" content="Contact Vance Dental Studio in Midtown Manhattan. Book a visit or send a message, we respond within 24 hours.">
-  <meta property="og:url" content="https://vancedental.com/contact.html">
-  <meta property="og:image" content="https://vancedental.com/og-image.svg">
+  <meta property="og:description" content="Message or call Vance Dental Studio at 1200 Avenue of the Americas, Suite 400, New York. Replies within 24 hours on business days.">
+  <meta property="og:url" content="https://vance-dental.netlify.app/contact.html">
+  <meta property="og:image" content="https://vance-dental.netlify.app/og-image.svg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Contact | Vance Dental Studio">
-  <meta name="twitter:description" content="Contact Vance Dental Studio in Midtown Manhattan. Book a visit or send a message, we respond within 24 hours.">
-  <meta name="twitter:image" content="https://vancedental.com/og-image.svg">
+  <meta name="twitter:description" content="Message or call Vance Dental Studio at 1200 Avenue of the Americas, Suite 400, New York. Replies within 24 hours on business days.">
+  <meta name="twitter:image" content="https://vance-dental.netlify.app/og-image.svg">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -77,9 +77,9 @@
 <nav class="breadcrumbs container" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">Contact</span></nav>
 <section class="page-hero">
   <div class="container">
-    <p class="eyebrow">Contact</p>
-    <h1>Write the studio.</h1>
-    <p class="lead mt-4">We respond to clinical and scheduling messages within 24 hours. For pain after hours, call the number on your post-op sheet.</p>
+    <p class="section-label">Contact</p>
+    <h1>Send a message</h1>
+    <p class="intro mt-4">Clinical and scheduling messages are answered within 24 hours. If you are in pain outside opening hours, call the number on your post-operative sheet.</p>
   </div>
 </section>
 
@@ -88,7 +88,7 @@
     <form class="card stack stack-4" name="contact" method="POST" action="/thank-you.html" netlify netlify-honeypot="bot-field" data-contact-form>
       <input type="hidden" name="form-name" value="contact">
       <p class="sr-only" aria-hidden="true">
-        <label>Don’t fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+        <label>Leave this field empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
       </p>
       <div class="field">
         <label class="field-label" for="c-name">Full name</label>
@@ -121,7 +121,7 @@
         <p class="field-error">Enter a short message.</p>
       </div>
       <button type="submit" class="btn btn-primary btn-lg">Send message</button>
-      <p class="micro text-3">Or book directly, <button type="button" class="btn-link" style="display:inline;min-height:auto;padding:0" data-book-open>open the appointment form</button>.</p>
+      <p class="micro text-3">To ask for a specific date instead, <button type="button" class="btn-link" style="display:inline;min-height:auto;padding:0" data-book-open>open the appointment form</button>.</p>
     </form>
     <div class="stack stack-5">
       <div class="card card-inset">
@@ -131,8 +131,8 @@
         <p class="small text-2">1200 Avenue of the Americas, Suite 400<br>New York, NY 10036</p>
       </div>
       <div class="card">
-        <h2 class="heading mb-3">Response promise</h2>
-        <p class="small text-2">Messages received on business days are answered within 24 hours. Weekend notes are triaged Monday morning unless marked urgent.</p>
+        <h2 class="heading mb-3">Response times</h2>
+        <p class="small text-2">Messages sent on a business day are answered within 24 hours. Weekend messages are read on Monday morning, unless you mark one urgent.</p>
       </div>
     </div>
   </div>
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     } catch (err) {
       btn.classList.remove('is-loading');
       btn.innerHTML = original;
-      window.vdToast?.('Could not send. Email hello@vancedental.com or try again.');
+      window.vdToast?.(`Could not send. Email hello@vancedental.com or try again.`);
     }
   });
 });
@@ -188,8 +188,8 @@ document.addEventListener('DOMContentLoaded',()=>{
           </span>
           <span>VANCE<em>DENTAL</em></span>
         </a>
-        <p class="small mt-5" style="color:var(--footer-muted);max-width:32ch;line-height:1.7">
-          Setting a clear standard for dental health with artistry, technology, and empathy. Your smile is planned, not improvised.
+        <p class="small mt-5" style="color:var(--footer-muted);max-width:34ch;line-height:1.7">
+          One dentist, one address. Dr. Alistair Vance examines every patient and writes every treatment plan himself.
         </p>
         <div class="social-row">
           <a class="social-btn" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><span data-icon="instagram" data-size="16" aria-hidden="true"></span></a>
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       </div>
       <div>
         <h2 class="footer-title">Newsletter</h2>
-        <p class="small" style="color:var(--footer-muted);margin-bottom:12px">Oral health notes and studio updates. Monthly, no clutter.</p>
+        <p class="small" style="color:var(--footer-muted);margin-bottom:12px">About one email a month: opening changes and the occasional note on oral health.</p>
         <form data-newsletter class="row gap-2" style="align-items:stretch">
           <label for="footer-email" class="sr-only">Email address</label>
           <input id="footer-email" class="input" type="email" name="email" required placeholder="Email address" autocomplete="email" spellcheck="false" style="background:#1F1C18;border-color:rgba(255,255,255,.12);color:#F3F0EA;min-height:40px;font-size:14px">
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; <span data-year>2026</span> Vance Dental Studio. All rights reserved.</p>
+      <p>&copy; <span data-year>2026</span> Vance Dental Studio</p>
       <p><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="sitemap.xml">Sitemap</a></p>
     </div>
   </div>
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   <button type="button" class="btn btn-primary" data-book-open><span data-icon="calendar" data-size="16" aria-hidden="true"></span> Book</button>
 </div>
 <div class="cookie-bar" data-cookie role="dialog" aria-label="Cookie preference">
-  <p>We use essential cookies to run the site and optional analytics if you accept. <a href="privacy.html" style="color:var(--brass)">Privacy Policy</a></p>
+  <p>This site stores your theme choice in a cookie. Analytics only load if you accept them. <a href="privacy.html" style="color:var(--brass)">Privacy Policy</a></p>
   <div class="row gap-2">
     <button type="button" class="btn btn-secondary btn-sm" data-cookie-reject>Reject</button>
     <button type="button" class="btn btn-primary btn-sm" data-cookie-accept>Accept</button>
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     <div class="row between start mb-5">
       <div>
         <h2 id="book-title" class="title" style="font-size:1.75rem">Book a visit</h2>
-        <p class="small text-2 mt-2">We confirm every request within 24 hours.</p>
+        <p class="small text-2 mt-2">We reply to every request within 24 hours.</p>
       </div>
       <button type="button" class="btn btn-icon btn-ghost btn-sm" data-book-close aria-label="Close dialog"><span data-icon="x" data-size="20" aria-hidden="true"></span></button>
     </div>
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         <label class="field-label" for="book-service">Service</label>
         <select class="select" id="book-service" name="service" required>
           <option value="" disabled selected>Select a service…</option>
-          <option value="Cosmetic Dentistry">Cosmetic Dentistry</option><option value="Dental Implants">Dental Implants</option><option value="Invisalign®">Invisalign®</option><option value="General Checkup">General Checkup</option>
+          <option value="Cosmetic dentistry">Cosmetic dentistry</option><option value="Dental implants">Dental implants</option><option value="Invisalign®">Invisalign®</option><option value="General checkup">General checkup</option>
         </select>
         <p class="field-error" role="alert">Choose a service.</p>
       </div>

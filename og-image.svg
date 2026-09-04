@@ -3,8 +3,8 @@
   <rect x="0" y="0" width="1200" height="8" fill="#A67C52"/>
   <rect x="80" y="160" width="56" height="56" rx="10" fill="#A67C52"/>
   <text x="152" y="198" font-family="Georgia, serif" font-size="28" fill="#1C1915">VANCE DENTAL</text>
-  <text x="80" y="320" font-family="Georgia, serif" font-size="64" fill="#1C1915">Modern precision</text>
-  <text x="80" y="400" font-family="Georgia, serif" font-size="64" fill="#A67C52">dentistry.</text>
+  <text x="80" y="320" font-family="Georgia, serif" font-size="64" fill="#1C1915">Vance Dental Studio</text>
+  <text x="80" y="400" font-family="Georgia, serif" font-size="40" fill="#A67C52">Suite 400, Midtown Manhattan</text>
   <text x="80" y="480" font-family="system-ui, sans-serif" font-size="24" fill="#5A554C">1200 Avenue of the Americas, Suite 400, New York</text>
   <text x="80" y="560" font-family="system-ui, sans-serif" font-size="20" fill="#8A847A">+1 (212) 555-0198  ·  hello@vancedental.com</text>
 </svg>

@@ -1,4 +1,4 @@
-/* Vance Dental Studio — Design System
+/* Vance Dental Studio: design system
    Personality: quiet Midtown suite, warm limestone paper, brass accent, charcoal ink.
    8px spacing · 3 radii · one elevation family · no purple/neon/sparkle */
 
@@ -189,7 +189,7 @@ h3, .heading {
   letter-spacing: -0.01em;
 }
 
-.lead {
+.intro {
   font-size: var(--text-lead);
   line-height: 1.65;
   color: var(--text-2);
@@ -215,7 +215,7 @@ h3, .heading {
 .accent { color: var(--brass); }
 .tabular { font-variant-numeric: tabular-nums; }
 
-.eyebrow {
+.section-label {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -226,7 +226,7 @@ h3, .heading {
   color: var(--brass);
   margin-bottom: var(--space-4);
 }
-.eyebrow::before {
+.section-label::before {
   content: "";
   width: 20px;
   height: 1.5px;
@@ -561,9 +561,9 @@ html.dark .theme-toggle::after { transform: translateX(20px); }
   background: var(--night);
   color: var(--on-dark);
 }
-.section-dark .text-2, .section-dark .lead { color: var(--on-dark-muted); }
-.section-dark .eyebrow { color: var(--brass); }
-.section-dark .eyebrow::before { background: var(--brass); }
+.section-dark .text-2, .section-dark .intro { color: var(--on-dark-muted); }
+.section-dark .section-label { color: var(--brass); }
+.section-dark .section-label::before { background: var(--brass); }
 
 .grid-2 { display: grid; gap: var(--space-6); }
 .grid-3 { display: grid; gap: var(--space-5); }
@@ -608,6 +608,8 @@ html.dark .theme-toggle::after { transform: translateX(20px); }
 .mt-6 { margin-top: var(--space-6); }
 .mt-8 { margin-top: var(--space-8); }
 .mt-10 { margin-top: var(--space-10); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
 .mb-4 { margin-bottom: var(--space-4); }
 .mb-5 { margin-bottom: var(--space-5); }
 .mb-6 { margin-bottom: var(--space-6); }

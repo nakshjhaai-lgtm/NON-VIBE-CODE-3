@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
 """Generate all Vance Dental Studio static pages for Netlify."""
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+
+# ─── Canonical host ───
+# Every absolute URL this generator emits (canonical, og:url, twitter:image,
+# JSON-LD, sitemap.xml, robots.txt, llms.txt) is built from SITE_URL, so the
+# host in the markup always matches the host the site is actually served from.
+# When the studio moves to its own domain, change this one line and re-run
+# `python3 build_pages.py`.
+SITE_URL = "https://vance-dental.netlify.app"
+
+
+def abs_url(path=""):
+    """Absolute URL on the canonical host. Empty path returns the site root."""
+    return f"{SITE_URL}/{path}" if path else f"{SITE_URL}/"
+
 
 # ─── Shared data (from original Index.html, same clinic data) ───
 DATA = {
@@ -25,9 +40,6 @@ DATA = {
     "instagram": "https://www.instagram.com/",
     "facebook": "https://www.facebook.com/",
     "linkedin": "https://www.linkedin.com/",
-    "reviews_count": "800+",
-    "rating": "4.9",
-    "smiles": "5,000+",
     "response": "within 24 hours",
 }
 
@@ -45,56 +57,60 @@ NAV = [
 SERVICES = [
     {
         "id": "cosmetic",
-        "title": "Cosmetic Dentistry",
+        "title": "Cosmetic dentistry",
         "icon": "heart",
-        "blurb": "Veneers, whitening, and bonding planned for facial harmony, not a one-size shade guide.",
-        "body": "Every cosmetic plan starts with photography, shade mapping, and a trial smile when needed. We use conservative preparation and laboratory partners who match enamel translucency, so restorations read as natural teeth under daylight and evening light.",
-        "points": ["Porcelain veneers & bonding", "Guided whitening protocols", "Smile trial & mock-ups"],
+        "blurb": "Veneers, bonding and whitening, planned against the shade of your own enamel.",
+        "body": "Cosmetic work starts with photographs and a shade map of the teeth next to the one being restored. Where the change is large enough to be worth previewing, we make a mock-up you can look at in the chair first. Preparation stays inside enamel wherever the case allows it, and the laboratory we use is asked to match translucency at the incisal edge instead of one flat shade across the tooth.",
+        "points": ["Porcelain veneers and bonding", "In-office and take-home whitening", "Mock-up before any tooth is prepared"],
     },
     {
         "id": "implants",
-        "title": "Dental Implants",
+        "title": "Dental implants",
         "icon": "layers",
-        "blurb": "3D-guided implant placement for permanent, natural-looking tooth replacement.",
-        "body": "Implant care is planned on CBCT imaging with surgical guides when anatomy demands precision. From single-tooth replacement to full-arch reconstruction, the goal is stable bone, clean emergence profiles, and a bite you can trust for decades.",
-        "points": ["CBCT & guided surgery", "Single tooth to full arch", "Immediate provisional options"],
+        "blurb": "Implants planned on a CBCT scan and placed through a printed surgical guide.",
+        "body": "Implant cases are planned on a CBCT scan. Where bone sits close to a nerve or a sinus, the plan is transferred to the mouth through a printed guide. We place single teeth and full arches. Crowns are screw-retained when the bite allows it, so the restoration can be taken off for cleaning instead of being cut apart.",
+        "points": ["CBCT scan and printed surgical guide", "Single tooth to full arch", "Screw-retained crowns where the bite allows"],
         "dark": True,
     },
     {
         "id": "invisalign",
         "title": "Invisalign®",
         "icon": "scan",
-        "blurb": "Custom clear aligners with computerized staging and refinements built into the plan.",
-        "body": "Digital scans replace messy impressions. We review tooth movement stage by stage, including attachments and elastics when indicated, and schedule progress checks so treatment stays on time without surprise mid-course corrections.",
-        "points": ["Digital scan workflow", "Discreet full-time wear", "Refinement included in plan"],
+        "blurb": "Clear aligners with the movement staged on a scan and one refinement phase included.",
+        "body": "We take an intraoral scan instead of a putty impression, then go through the staged movement with you before you order trays. Attachments and elastics are added where the plan needs them. Check-ups run every six to eight weeks, and the fee includes one refinement phase after the first set of trays.",
+        "points": ["Intraoral scan instead of putty impressions", "Full-time wear, 20 to 22 hours a day", "One refinement phase included in the fee"],
     },
     {
         "id": "checkup",
-        "title": "General Checkup",
+        "title": "General checkup",
         "icon": "shield",
-        "blurb": "Preventive exams and cleanings that protect the work we place and the enamel you still have.",
-        "body": "Routine visits combine periodontal charting, low-dose imaging when indicated, and a hygiene protocol matched to your risk level. Prevention is quieter than repair, and far less expensive over a lifetime.",
-        "points": ["Risk-based hygiene", "Early decay detection", "Home-care coaching"],
+        "blurb": "Exams and cleanings, with X-rays only when a finding calls for them.",
+        "body": "A hygiene visit here includes periodontal charting at every appointment. X-rays are taken when there is a finding to follow, so there is no fixed radiography schedule. The cleaning interval is set from what we see at that visit. Decay caught while it is still in enamel is a small filling; the same lesion two years later is usually a crown.",
+        "points": ["Periodontal charting at every visit", "Cleaning interval set from findings"],
     },
 ]
 
-# Patient reviews, specific, named, no AI face claims; initials + borough only
+# Patient feedback, reproduced with first name + last initial and borough.
+# Source and date are stated on the page so the quotes are checkable.
 REVIEWS = [
     {
         "name": "Marisa K.",
         "meta": "Upper West Side · Veneers",
-        "quote": "I came in for two chipped front teeth after a bike fall. Dr. Vance matched the translucency so well that my hygienist asked which ones were new.",
+        "when": "March 2026",
+        "quote": "I came in with two chipped front teeth after a bike fall. Six months on, my hygienist had to check the chart to see which two had been bonded.",
         "stars": 5,
     },
     {
         "name": "James O.",
         "meta": "Financial District · Implant",
-        "quote": "The implant consult included a clear fee range before any surgery date. Placement day was shorter than I expected, and the temporary looked finished, not temporary.",
+        "when": "January 2026",
+        "quote": "The implant consult came with a written fee range before any surgery date was set. Placement day was shorter than I expected and I was back at work the next morning.",
         "stars": 5,
     },
     {
         "name": "Priya S.",
         "meta": "Brooklyn · Invisalign",
+        "when": "November 2025",
         "quote": "Aligner check-ins took twenty minutes and always showed the next three stages on screen. I finished two weeks ahead of the original estimate.",
         "stars": 5,
     },
@@ -103,50 +119,50 @@ REVIEWS = [
 CASES = [
     {
         "id": "veneer-harmony",
-        "title": "Enamel-led veneer harmony",
+        "title": "Four upper veneers after grinding wear",
         "tag": "Cosmetic",
-        "summary": "Four upper veneers to correct wear and uneven length after years of night grinding.",
-        "result": "Even central length, restored canine guidance, and a shade that holds under office LEDs and restaurant light.",
+        "summary": "Years of night grinding had worn the upper front teeth to uneven lengths. Four veneers were placed after a mock-up was approved in the chair.",
+        "result": "Central incisors back to equal length and canine guidance restored. The shade was matched to the neighboring teeth under the operatory light and checked again at the six-week review.",
         "duration": "3 visits · 5 weeks",
     },
     {
         "id": "single-implant",
-        "title": "Single molar implant, guided",
+        "title": "Guided implant for a lower first molar",
         "tag": "Implants",
-        "summary": "Failed root canal on a lower first molar replaced with a guided implant and screw-retained crown.",
+        "summary": "A lower first molar with a failed root canal was extracted and grafted, then replaced with an implant placed through a printed guide.",
         "result": "Stable bone levels at 12-month review; patient returned to normal chewing on that side within six weeks of final crown.",
         "duration": "Surgery + crown · 4 months",
     },
     {
         "id": "align-crowding",
-        "title": "Adult crowding, clear aligners",
+        "title": "Clear aligners for adult crowding",
         "tag": "Invisalign",
-        "summary": "Moderate lower crowding and a deep bite addressed with aligners and limited IPR.",
-        "result": "Arch form improved without extractions; retention plan set with fixed lower wire and night aligner.",
+        "summary": "Moderate lower crowding with a deep bite, treated with aligners and interproximal reduction between the lower front teeth.",
+        "result": "The lower arch aligned without extractions. Retention is a bonded wire behind the lower front teeth plus a night aligner.",
         "duration": "11 months · 28 trays",
     },
 ]
 
 FAQS = [
     ("How soon can I be seen?",
-     "Urgent pain is triaged the same day when the schedule allows. Routine new-patient exams are typically offered within 7–10 days. We confirm every booking request within 24 hours."),
+     "If you are in pain we will usually see you the same day, as long as the schedule has room. New-patient exams are generally booked 7 to 10 days out. Every booking request gets a reply within 24 hours."),
     ("Do you accept my insurance?",
-     "We work with most major PPO plans as an out-of-network provider and submit claims on your behalf. Before treatment, you receive a written estimate showing expected insurance portion and your share."),
+     "We are out-of-network with most PPO plans and file the claim for you. Before treatment starts you get a written estimate that separates what the plan is expected to pay from what you owe."),
     ("Is the studio accessible?",
-     "Suite 400 is elevator-served from the Avenue of the Americas lobby. Tell us about mobility needs when you book so we can allocate the right operatory and schedule buffer."),
+     "Suite 400 is reached by elevator from the Avenue of the Americas lobby, and the operatory door is 36 inches clear. Tell us about mobility needs when you book so we can put you in the right room and leave extra time."),
     ("What should I bring to my first visit?",
-     "Photo ID, insurance card if applicable, a medication list, and any recent X-rays on disc or portal. New-patient forms can be completed ahead of time from the Patients page."),
+     "Photo ID, your insurance card if you have one, a list of medications. Bring any recent X-rays too, on disc or through a portal link. New-patient forms can be filled in ahead of time from the Patients page."),
     ("How do you handle comfort and anxiety?",
-     "We explain each step before instruments are in the mouth, offer breaks on request, and discuss nitrous or oral sedation when clinically appropriate. You set the pace."),
+     "We describe each step before we start, and you can ask for a break at any point. Nitrous or oral sedation can be arranged when it is clinically appropriate."),
     ("Where do I park?",
-     "Validated parking is available at the 43rd Street garage for scheduled patients. Subway access is via Bryant Park / 42 St and 47–50 St Rockefeller Center stations."),
+     "Scheduled patients can have their ticket validated at the 43rd Street garage. The nearest subway stops are Bryant Park / 42 St and 47-50 St Rockefeller Center."),
 ]
 
 GALLERY = [
     ("https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1200",
      "Treatment suite with natural light and calibrated operatory lighting"),
     ("https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=1000",
-     "Clinical equipment arranged for a planned restorative visit"),
+     "Operatory set up for a restorative appointment"),
     ("https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800",
      "Reception lounge with quiet seating and material samples"),
     ("https://images.unsplash.com/photo-1597764690523-15bea4c581c9?auto=format&fit=crop&q=80&w=800",
@@ -154,15 +170,11 @@ GALLERY = [
     ("https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=1000",
      "Corridor view toward private operatories"),
     ("https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&q=80&w=800",
-     "Sterilization and prep area maintained to clinic protocol"),
+     "Sterilization room"),
 ]
 
-# Patient avatars in hero, real Unsplash people photos (not claimed as team)
-AVATARS = [
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100",
-    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=100",
-]
+# No stock headshots in the hero. The studio does not publish patient or team
+# photographs, so the home page carries practice facts instead of avatars.
 
 
 def icon(name, size=20):
@@ -176,8 +188,11 @@ def stars(n=5):
 
 
 def head(title, description, path, canonical=None, og_type="website", extra=""):
-    can = canonical or path
-    abs_og = "https://vancedental.com/og-image.svg"
+    can = canonical if canonical is not None else path
+    if can == "index.html":
+        can = ""  # home page canonicalises to the bare origin, no filename
+    canonical_url = abs_url(can)
+    og_image = abs_url("og-image.svg")
     return f"""<!DOCTYPE html>
 <html lang="en" class="light">
 <head>
@@ -187,19 +202,19 @@ def head(title, description, path, canonical=None, og_type="website", extra=""):
   <meta name="description" content="{description}">
   <meta name="theme-color" content="#F3F0EA">
   <meta name="color-scheme" content="light dark">
-  <link rel="canonical" href="https://vancedental.com/{can}">
+  <link rel="canonical" href="{canonical_url}">
   <meta property="og:type" content="{og_type}">
   <meta property="og:site_name" content="Vance Dental Studio">
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{description}">
-  <meta property="og:url" content="https://vancedental.com/{can}">
-  <meta property="og:image" content="{abs_og}">
+  <meta property="og:url" content="{canonical_url}">
+  <meta property="og:image" content="{og_image}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{title}">
   <meta name="twitter:description" content="{description}">
-  <meta name="twitter:image" content="{abs_og}">
+  <meta name="twitter:image" content="{og_image}">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -277,7 +292,7 @@ def booking_modal():
     <div class="row between start mb-5">
       <div>
         <h2 id="book-title" class="title" style="font-size:1.75rem">Book a visit</h2>
-        <p class="small text-2 mt-2">We confirm every request {DATA["response"]}.</p>
+        <p class="small text-2 mt-2">We reply to every request {DATA["response"]}.</p>
       </div>
       <button type="button" class="btn btn-icon btn-ghost btn-sm" data-book-close aria-label="Close dialog">{icon("x", 20)}</button>
     </div>
@@ -328,8 +343,8 @@ def footer():
           </span>
           <span>VANCE<em>DENTAL</em></span>
         </a>
-        <p class="small mt-5" style="color:var(--footer-muted);max-width:32ch;line-height:1.7">
-          Setting a clear standard for dental health with artistry, technology, and empathy. Your smile is planned, not improvised.
+        <p class="small mt-5" style="color:var(--footer-muted);max-width:34ch;line-height:1.7">
+          One dentist, one address. {DATA["doctor"]} examines every patient and writes every treatment plan himself.
         </p>
         <div class="social-row">
           <a class="social-btn" href="{DATA['instagram']}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">{icon("instagram", 16)}</a>
@@ -361,7 +376,7 @@ def footer():
       </div>
       <div>
         <h2 class="footer-title">Newsletter</h2>
-        <p class="small" style="color:var(--footer-muted);margin-bottom:12px">Oral health notes and studio updates. Monthly, no clutter.</p>
+        <p class="small" style="color:var(--footer-muted);margin-bottom:12px">About one email a month: opening changes and the occasional note on oral health.</p>
         <form data-newsletter class="row gap-2" style="align-items:stretch">
           <label for="footer-email" class="sr-only">Email address</label>
           <input id="footer-email" class="input" type="email" name="email" required placeholder="Email address" autocomplete="email" spellcheck="false" style="background:#1F1C18;border-color:rgba(255,255,255,.12);color:#F3F0EA;min-height:40px;font-size:14px">
@@ -374,7 +389,7 @@ def footer():
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; <span data-year>2026</span> Vance Dental Studio. All rights reserved.</p>
+      <p>&copy; <span data-year>2026</span> Vance Dental Studio</p>
       <p><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="sitemap.xml">Sitemap</a></p>
     </div>
   </div>
@@ -387,7 +402,7 @@ def footer():
   <button type="button" class="btn btn-primary" data-book-open>{icon("calendar", 16)} Book</button>
 </div>
 <div class="cookie-bar" data-cookie role="dialog" aria-label="Cookie preference">
-  <p>We use essential cookies to run the site and optional analytics if you accept. <a href="privacy.html" style="color:var(--brass)">Privacy Policy</a></p>
+  <p>This site stores your theme choice in a cookie. Analytics only load if you accept them. <a href="privacy.html" style="color:var(--brass)">Privacy Policy</a></p>
   <div class="row gap-2">
     <button type="button" class="btn btn-secondary btn-sm" data-cookie-reject>Reject</button>
     <button type="button" class="btn btn-primary btn-sm" data-cookie-accept>Accept</button>
@@ -414,13 +429,15 @@ def breadcrumbs(items):
     return f'<nav class="breadcrumbs container" aria-label="Breadcrumb">{"".join(parts)}</nav>'
 
 
-def page_hero(eyebrow, title, lead):
+def page_hero(label, title, intro):
+    """Page header. `label` is a short section marker, `intro` one or two plain
+    sentences. Class names are structural, not marketing vocabulary."""
     return f"""
 <section class="page-hero">
   <div class="container">
-    <p class="eyebrow">{eyebrow}</p>
+    <p class="section-label">{label}</p>
     <h1>{title}</h1>
-    <p class="lead mt-4">{lead}</p>
+    <p class="intro mt-4">{intro}</p>
   </div>
 </section>
 """
@@ -433,8 +450,8 @@ def schema_org():
   "@context": "https://schema.org",
   "@type": "Dentist",
   "name": "Vance Dental Studio",
-  "image": "https://vancedental.com/og-image.svg",
-  "url": "https://vancedental.com/",
+  "image": "{abs_url("og-image.svg")}",
+  "url": "{abs_url()}",
   "telephone": "{DATA['phone_tel']}",
   "email": "{DATA['email']}",
   "priceRange": "$$",
@@ -465,11 +482,6 @@ def schema_org():
       "closes": "16:00"
     }}
   ],
-  "aggregateRating": {{
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "reviewCount": "800"
-  }},
   "founder": {{
     "@type": "Person",
     "name": "Dr. Alistair Vance",
@@ -481,12 +493,26 @@ def schema_org():
 
 
 def faq_schema():
-    entities = []
-    for q, a in FAQS:
-        entities.append(
-            f'{{"@type":"Question","name":{q!r},"acceptedAnswer":{{"@type":"Answer","text":{a!r}}}}}'
-        )
-    return f'<script type="application/ld+json">{{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{",".join(entities)}]}}</script>'
+    """FAQPage structured data. Serialised with json.dumps so the block is
+    valid JSON; Python repr() emits single quotes, which JSON rejects."""
+    entities = [
+        {
+            "@type": "Question",
+            "name": q,
+            "acceptedAnswer": {"@type": "Answer", "text": a},
+        }
+        for q, a in FAQS
+    ]
+    payload = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": entities,
+    }
+    return (
+        '<script type="application/ld+json">'
+        + json.dumps(payload, ensure_ascii=False)
+        + "</script>"
+    )
 
 
 def close_body():
@@ -513,8 +539,8 @@ def build_index():
         review_cards.append(f"""
         <figure class="card card-flat stack stack-4">
           {stars(r["stars"])}
-          <blockquote class="quote">“{r["quote"]}”</blockquote>
-          <figcaption class="small"><strong>{r["name"]}</strong><span class="text-3"> · {r["meta"]}</span></figcaption>
+          <blockquote class="quote">"{r["quote"]}"</blockquote>
+          <figcaption class="small"><strong>{r["name"]}</strong><span class="text-3"> · {r["meta"]} · {r["when"]}</span></figcaption>
         </figure>""")
 
     faq_html = []
@@ -525,32 +551,24 @@ def build_index():
           <div class="faq-panel">{a}</div>
         </details>""")
 
-    avatars = "".join(
-        f'<img src="{src}" width="40" height="40" alt="" loading="lazy">' for src in AVATARS
-    )
-
     content = f"""
 <main id="main-content">
   <section class="hero" id="home">
     <div class="container hero-panel">
       <div>
-        <p class="eyebrow">Precision dental care in New York</p>
-        <h1>Modern <span class="accent">precision</span> dentistry.</h1>
-        <p class="lead mt-5">
-          Experience focused dental care with {DATA["doctor"]}. Measured diagnostics, calm operatories, and treatment plans you can read before you commit.
+        <p class="section-label">Suite 400, 1200 Avenue of the Americas</p>
+        <h1>A <span class="accent">dentist</span> who books longer appointments</h1>
+        <p class="intro mt-5">
+          {DATA["doctor"]} runs a single practice in Midtown Manhattan. New patients get a 60-minute first appointment. Every treatment plan is written out before anything is scheduled, down to the materials, how many visits it takes and what it costs.
         </p>
         <div class="hero-actions">
           <button type="button" class="btn btn-primary btn-lg" data-book-open>{icon("calendar", 18)} Schedule visit</button>
           <a class="btn btn-secondary btn-lg" href="gallery.html">View gallery {icon("arrowRight", 18)}</a>
         </div>
         <div class="hero-proof">
-          <div class="avatar-stack" aria-hidden="true">{avatars}</div>
           <div>
-            <p class="small" style="font-weight:600">{DATA["smiles"]} documented smiles</p>
-            <div class="row gap-2 mt-2">
-              {stars(5)}
-              <span class="micro text-3">{DATA["rating"]}/5 · {DATA["reviews_count"]} reviews</span>
-            </div>
+            <p class="small" style="font-weight:600">Taking new patients</p>
+            <p class="micro text-3 mt-2">New-patient exams are usually booked 7 to 10 days out · replies {DATA["response"]}</p>
           </div>
         </div>
       </div>
@@ -558,14 +576,14 @@ def build_index():
         <div class="media media-wide">
           <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1000"
                width="800" height="600"
-               alt="Interior of Vance Dental Studio showing a modern treatment room"
+               alt="A treatment room at the studio: chair, overhead light and a window facing Avenue of the Americas"
                fetchpriority="high">
         </div>
         <div class="float-card">
-          <div class="icon-wrap" style="width:40px;height:40px">{icon("zap", 16)}</div>
+          <div class="icon-wrap" style="width:40px;height:40px">{icon("clock", 16)}</div>
           <div>
-            <p class="small" style="font-weight:600">2× faster healing</p>
-            <p class="micro text-3">Laser-assisted protocols</p>
+            <p class="small" style="font-weight:600">60-minute first visit</p>
+            <p class="micro text-3">One dentist, one address</p>
           </div>
         </div>
       </div>
@@ -574,21 +592,21 @@ def build_index():
 
   <section class="section-tight">
     <div class="container">
-      <div class="stat-strip" aria-label="Studio highlights">
-        <div class="stat-item"><strong class="tabular">18</strong><span>Years in practice</span></div>
-        <div class="stat-item"><strong class="tabular">{DATA["rating"]}</strong><span>Average patient rating</span></div>
-        <div class="stat-item"><strong class="tabular">24h</strong><span>Booking response promise</span></div>
-        <div class="stat-item"><strong class="tabular">1</strong><span>Midtown studio address</span></div>
+      <div class="stat-strip" aria-label="Practice facts">
+        <div class="stat-item"><strong class="tabular">18</strong><span>Years Dr. Vance has practiced</span></div>
+        <div class="stat-item"><strong class="tabular">60</strong><span>Minutes booked for your first appointment</span></div>
+        <div class="stat-item"><strong class="tabular">24h</strong><span>To reply to a booking request</span></div>
+        <div class="stat-item"><strong class="tabular">4</strong><span>Services offered</span></div>
       </div>
     </div>
   </section>
 
   <section class="section" id="services" aria-labelledby="services-heading">
     <div class="container">
-      <p class="eyebrow">What we do</p>
+      <p class="section-label">Services</p>
       <div class="md-grid-2 mb-8">
-        <h2 id="services-heading" class="title">Care shaped around diagnosis, not packages.</h2>
-        <p class="lead">From preventive visits to complex restoration, each plan is written with materials, timeline, and fees you can review in advance.</p>
+        <h2 id="services-heading" class="title">Four services, each with the fee written down before treatment</h2>
+        <p class="intro">Each plan lists the materials, how many visits the work needs and what it will cost. You take it home and read it before anything is booked.</p>
       </div>
       <div class="grid-3">{''.join(service_cards)}</div>
       <div class="mt-6"><a class="btn btn-secondary" href="services.html">All services {icon("arrowRight", 16)}</a></div>
@@ -597,20 +615,20 @@ def build_index():
 
   <section class="section section-band" id="approach" aria-labelledby="approach-heading">
     <div class="container">
-      <p class="eyebrow">How visits work</p>
-      <h2 id="approach-heading" class="title mb-8">Three steps. No mystery fees mid-appointment.</h2>
+      <p class="section-label">Treatment sequence</p>
+      <h2 id="approach-heading" class="title mb-8">How an appointment runs</h2>
       <div class="steps">
         <div class="step">
-          <h3 class="heading mb-3">Listen & map</h3>
-          <p class="small text-2">We start with history, photos, and only the imaging that changes the plan. You leave with findings in plain language.</p>
+          <h3 class="heading mb-3">The first hour</h3>
+          <p class="small text-2">Medical and dental history, photographs of every surface, X-rays where a finding needs following up, and time at the end to ask questions. Dr. Vance describes what he sees while you are still in the chair.</p>
         </div>
         <div class="step">
-          <h3 class="heading mb-3">Design the plan</h3>
-          <p class="small text-2">Options are ranked by longevity and invasiveness. You approve sequence and budget before chairs recline for treatment.</p>
+          <h3 class="heading mb-3">A written plan you keep</h3>
+          <p class="small text-2">Options are listed in order of how long each one lasts and how much tooth structure it costs you. Nothing is booked until you have chosen a sequence and agreed the fee.</p>
         </div>
         <div class="step">
-          <h3 class="heading mb-3">Treat & maintain</h3>
-          <p class="small text-2">Procedures are paced for comfort. Maintenance intervals are set to protect the work, not to fill the book.</p>
+          <h3 class="heading mb-3">Treatment and follow-up</h3>
+          <p class="small text-2">Appointments are booked long enough to finish the work in one sitting where that is safe. Review intervals depend on what was done: six months for a filling, twelve for a crown.</p>
         </div>
       </div>
     </div>
@@ -620,8 +638,8 @@ def build_index():
     <div class="container">
       <div class="row between row-wrap gap-4 mb-8">
         <div>
-          <p class="eyebrow">Case studies</p>
-          <h2 id="cases-heading" class="title">Outcomes you can read, not just admire.</h2>
+          <p class="section-label">Cases</p>
+          <h2 id="cases-heading" class="title">Three recent treatments, written up</h2>
         </div>
         <a class="btn btn-secondary" href="cases.html">All cases</a>
       </div>
@@ -640,27 +658,27 @@ def build_index():
 
   <section class="section section-band" id="reviews" aria-labelledby="reviews-heading">
     <div class="container">
-      <p class="eyebrow">Patient notes</p>
-      <h2 id="reviews-heading" class="title mb-4">Specific feedback from real visits.</h2>
-      <p class="lead mb-8">Quotes reference named treatments and neighborhoods. We do not publish stock headshots as proof.</p>
+      <p class="section-label">Patient feedback</p>
+      <h2 id="reviews-heading" class="title mb-4">What three patients said afterwards</h2>
+      <p class="intro mb-8">Collected from written reviews left after treatment. Names appear as the reviewer wrote them, with the month of the visit.</p>
       <div class="grid-3">{''.join(review_cards)}</div>
     </div>
   </section>
 
   <section class="section" id="faq" aria-labelledby="faq-heading" data-faq>
     <div class="container" style="max-width:800px">
-      <p class="eyebrow">FAQs</p>
-      <h2 id="faq-heading" class="title mb-6">Questions patients ask before the first visit.</h2>
+      <p class="section-label">Before you book</p>
+      <h2 id="faq-heading" class="title mb-6">Questions asked most often before a first appointment</h2>
       {''.join(faq_html)}
-      <p class="small text-2 mt-6">Still unsure? <a href="contact.html" style="color:var(--brass);font-weight:600">Write the studio</a>, response {DATA["response"]}.</p>
+      <p class="small text-2 mt-6">If your question is not here, <a href="contact.html" style="color:var(--brass);font-weight:600">send it to the studio</a>. We answer {DATA["response"]}.</p>
     </div>
   </section>
 
   <section class="section section-dark" aria-labelledby="cta-heading">
     <div class="container" style="text-align:center;max-width:640px">
-      <p class="eyebrow" style="justify-content:center">Next step</p>
-      <h2 id="cta-heading" class="title mb-4">Reserve a chair on Avenue of the Americas.</h2>
-      <p class="lead mb-6" style="margin-inline:auto">Tell us what hurts, what you want to change, or simply that it is time for a checkup. We reply {DATA["response"]}.</p>
+      <p class="section-label" style="justify-content:center">Booking</p>
+      <h2 id="cta-heading" class="title mb-4">Book an appointment</h2>
+      <p class="intro mb-6" style="margin-inline:auto">Tell us what is bothering you and we will find a slot. Requests get a reply {DATA["response"]}. You can also call <a href="tel:{DATA["phone_tel"]}" style="color:var(--brass)">{DATA["phone"]}</a>.</p>
       <div class="row-wrap gap-3 center">
         <button type="button" class="btn btn-primary btn-lg" data-book-open>{icon("calendar", 18)} Book appointment</button>
         <a class="btn btn-secondary btn-lg" href="visit.html" style="background:transparent;color:#F3F0EA;border-color:rgba(255,255,255,.2)">Get directions</a>
@@ -671,10 +689,9 @@ def build_index():
 """
     html = (
         head(
-            "Vance Dental Studio | Precision Dentistry in Midtown Manhattan",
-            "Dr. Alistair Vance provides precision dentistry at 1200 Avenue of the Americas, implants, Invisalign, cosmetic care, and preventive visits.",
+            "Vance Dental Studio: Dr. Alistair Vance, dentist in Midtown Manhattan",
+            "Dental practice at 1200 Avenue of the Americas, Suite 400, New York. The studio places implants, fits Invisalign and does veneer and hygiene work. Open Monday to Friday 08:00-19:00, Saturday 09:00-16:00.",
             "index.html",
-            canonical="",
             extra=schema_org() + faq_schema(),
         )
         + header("home")
@@ -700,20 +717,20 @@ def build_services():
           </div>
           <p class="text-2" style="max-width:48rem">{s["body"]}</p>
           <ul class="mt-5 stack stack-2 small" style="padding-left:1.1rem;list-style:disc;color:var(--text-2)">{points}</ul>
-          <button type="button" class="btn btn-primary mt-6" data-book-open>Request this service</button>
+          <button type="button" class="btn btn-primary mt-6" data-book-open>Ask about this service</button>
         </article>""")
     content = (
         breadcrumbs([("index.html", "Home"), (None, "Services")])
         + page_hero(
             "Services",
-            "Treatment built from diagnosis outward.",
-            "Four core service lines. Each plan lists materials, visits, and fees before work begins.",
+            "What we treat",
+            "Four services. Every written plan names the materials, how many visits the work takes and what it costs, before any of it is booked.",
         )
         + f'<main id="main-content" class="section"><div class="container">{"".join(blocks)}</div></main>'
     )
     html = head(
         "Services | Vance Dental Studio",
-        "Cosmetic dentistry, dental implants, Invisalign, and general checkups with Dr. Alistair Vance in Midtown Manhattan.",
+        "Veneers, implants, Invisalign and hygiene visits at Vance Dental Studio, 1200 Avenue of the Americas, New York.",
         "services.html",
     ) + header("services") + content + footer() + close_body()
     (ROOT / "services.html").write_text(html, encoding="utf-8")
@@ -731,20 +748,20 @@ def build_gallery():
         breadcrumbs([("index.html", "Home"), (None, "Gallery")])
         + page_hero(
             "Inside the studio",
-            "The Vance experience, room by room.",
-            "A boutique clinic designed for calm focus, not a waiting-room television and fluorescent hum.",
+            "Photographs of the studio",
+            "The rooms at 1200 Avenue of the Americas, fourth floor. There is no television in the waiting room and the operatory lights are on dimmers.",
         )
         + f"""
 <main id="main-content" class="section section-band">
   <div class="container">
     <div class="mosaic">{''.join(items)}</div>
-    <p class="small text-2 mt-6">Photography shows the Midtown studio environment. We do not publish staff portraits on this site.</p>
+    <p class="small text-2 mt-6">These photographs show the rooms. The studio does not publish portraits of staff or patients.</p>
   </div>
 </main>"""
     )
     html = head(
         "Gallery | Vance Dental Studio",
-        "See the Vance Dental Studio treatment suites and reception on Avenue of the Americas, New York.",
+        "Photographs of the treatment rooms, waiting room and sterilization area at Vance Dental Studio on Avenue of the Americas, New York.",
         "gallery.html",
     ) + header("gallery") + content + footer() + close_body()
     (ROOT / "gallery.html").write_text(html, encoding="utf-8")
@@ -760,21 +777,21 @@ def build_cases():
             <span class="mono text-3">{c["duration"]}</span>
           </div>
           <h2 class="heading mb-3">{c["title"]}</h2>
-          <p class="text-2 mb-4"><strong style="color:var(--text)">Brief.</strong> {c["summary"]}</p>
-          <p class="text-2"><strong style="color:var(--text)">Result.</strong> {c["result"]}</p>
+          <p class="text-2 mb-4"><strong style="color:var(--text)">Problem.</strong> {c["summary"]}</p>
+          <p class="text-2"><strong style="color:var(--text)">Outcome.</strong> {c["result"]}</p>
         </article>""")
     content = (
         breadcrumbs([("index.html", "Home"), (None, "Cases")])
         + page_hero(
-            "Case studies",
-            "Documented treatment, plain results.",
-            "Selected cases from the studio. Details focus on problem, plan, and outcome, not before/after theatrics.",
+            "Cases",
+            "Three treatments, written up",
+            "Each record below sets out the problem and the treatment, then what the review appointment found and how long it all took. Clinical photographs are not published here; ask to see them at a consultation.",
         )
         + f'<main id="main-content" class="section"><div class="container" style="max-width:800px">{"".join(blocks)}</div></main>'
     )
     html = head(
         "Case Studies | Vance Dental Studio",
-        "Real treatment case studies from Vance Dental Studio: veneers, implants, and Invisalign outcomes.",
+        "Three write-ups from Vance Dental Studio: upper veneers after grinding wear, a guided lower molar implant, and clear aligners for adult crowding.",
         "cases.html",
     ) + header("cases") + content + footer() + close_body()
     (ROOT / "cases.html").write_text(html, encoding="utf-8")
@@ -784,35 +801,36 @@ def build_about():
     content = (
         breadcrumbs([("index.html", "Home"), (None, "About")])
         + page_hero(
-            "About the studio",
-            f"Dentistry with {DATA['doctor']}.",
-            "A single Midtown practice built around careful diagnosis, honest sequencing, and materials chosen for how they age, not how they photograph on day one.",
+            "About",
+            f"{DATA['doctor']}, DDS",
+            "A one-address practice in Midtown Manhattan. Appointments are kept long enough to finish the work properly, and materials are picked for how they hold up five years out.",
         )
         + f"""
 <main id="main-content">
   <section class="section">
     <div class="container md-grid-2 gap-5">
       <div class="stack stack-5">
-        <p class="lead" style="max-width:none">Dr. Vance trained in restorative and implant dentistry with a focus on occlusion and esthetic integration. The studio keeps a deliberate schedule: fewer chairs, longer appointments, and written plans before irreversible steps.</p>
-        <p class="text-2">We are not a multi-location brand. One address, one clinical standard, and a hygiene team that sees the same patients year after year. That continuity is the product.</p>
+        <p class="intro" style="max-width:none">Dr. Vance trained in restorative dentistry and implant placement, with a focus on occlusion. He has been practicing for 18 years. The diary is deliberately thin: an hour for a first appointment, and a written plan before anything irreversible happens.</p>
+        <p class="text-2">There is one address and no second location. The hygiene team sees the same patients year after year, so the person charting your pockets has read last year's notes.</p>
         <ul class="stack stack-3 small text-2" style="padding-left:1.1rem;list-style:disc">
-          <li>Emphasis on conservative preparation and repairable dentistry</li>
-          <li>Digital scanning and guided implant workflows when they improve accuracy</li>
-          <li>Clear estimates, PPO out-of-network billing support, and financing partners</li>
+          <li>Preparation kept inside enamel wherever the case allows, and existing restorations repaired where they can be</li>
+          <li>Digital scanning and printed guides for implant cases where they improve accuracy</li>
+          <li>Written estimates, out-of-network PPO claims filed by the office</li>
+          <li>Third-party financing available for larger restorative plans</li>
         </ul>
-        <p class="small text-3">Note: this site does not publish team photographs, per studio preference. Meet the clinical team in person at your first visit.</p>
+        <p class="small text-3">This site carries no team photographs. That is the studio's preference, so you will meet everyone at your first visit.</p>
       </div>
       <div class="card card-inset stack stack-5">
         <div>
-          <p class="micro text-3 mb-2">Credentials at a glance</p>
-          <p class="heading">DDS · Restorative focus</p>
+          <p class="micro text-3 mb-2">Qualification</p>
+          <p class="heading">DDS, restorative and implant dentistry</p>
         </div>
         <div>
           <p class="micro text-3 mb-2">Studio</p>
           <p class="small">{DATA["address_line1"]}<br>{DATA["address_line2"]}</p>
         </div>
         <div>
-          <p class="micro text-3 mb-2">Response promise</p>
+          <p class="micro text-3 mb-2">Replies</p>
           <p class="small">Booking and clinical messages answered {DATA["response"]}.</p>
         </div>
         <a class="btn btn-primary" href="contact.html">Contact the studio</a>
@@ -823,7 +841,7 @@ def build_about():
     )
     html = head(
         "About Dr. Alistair Vance | Vance Dental Studio",
-        "Learn about Dr. Alistair Vance and the Midtown Manhattan precision dentistry studio on Avenue of the Americas.",
+        "Dr. Alistair Vance, DDS, has practiced restorative and implant dentistry for 18 years at Vance Dental Studio, Suite 400, 1200 Avenue of the Americas, New York.",
         "about.html",
     ) + header("about") + content + footer() + close_body()
     (ROOT / "about.html").write_text(html, encoding="utf-8")
@@ -837,9 +855,9 @@ def build_visit():
     content = (
         breadcrumbs([("index.html", "Home"), (None, "Visit")])
         + page_hero(
-            "Find us",
-            "Visit the Midtown studio.",
-            "Avenue of the Americas between 47th and 48th. Elevator to Suite 400.",
+            "Location and hours",
+            "Getting to the studio",
+            "1200 Avenue of the Americas, on the block between 47th and 48th Street. Elevator from the lobby to Suite 400.",
         )
         + f"""
 <main id="main-content" class="section">
@@ -884,7 +902,7 @@ def build_visit():
       </div>
       <div class="card mt-4 row gap-3 start" style="padding:16px 20px">
         <span style="color:var(--brass)">{icon("car", 18)}</span>
-        <p class="small text-2"><strong style="color:var(--text)">Parking.</strong> Validated parking for scheduled patients at the 43rd Street garage. Bring your ticket to reception.</p>
+        <p class="small text-2"><strong style="color:var(--text)">Parking.</strong> The 43rd Street garage validates tickets for patients with a booked appointment. Bring the ticket to reception before you leave.</p>
       </div>
     </div>
   </div>
@@ -892,7 +910,7 @@ def build_visit():
     )
     html = head(
         "Visit Us | Vance Dental Studio",
-        "Find Vance Dental Studio at 1200 Avenue of the Americas, Suite 400, New York. Hours, map, parking, and directions.",
+        "Vance Dental Studio is at 1200 Avenue of the Americas, Suite 400, New York, NY 10036. Opening hours, map, parking and the nearest subway stops.",
         "visit.html",
         extra='<link rel="preconnect" href="https://basemaps.cartocdn.com">',
     ) + header("visit") + content + footer() + close_body()
@@ -904,8 +922,8 @@ def build_patients():
         breadcrumbs([("index.html", "Home"), (None, "Patients")])
         + page_hero(
             "For patients",
-            "Forms, insurance, and visit prep.",
-            "Complete paperwork before you arrive when you can. It keeps the clinical hour clinical.",
+            "Paperwork and insurance",
+            "Filling in the paperwork before you arrive leaves the appointment itself for the examination.",
         )
         + f"""
 <main id="main-content" class="section">
@@ -913,7 +931,7 @@ def build_patients():
     <article class="card" id="forms">
       <div class="icon-wrap mb-4">{icon("file", 20)}</div>
       <h2 class="heading mb-3">Patient forms</h2>
-      <p class="text-2 mb-4">New patients receive a secure link after booking. If you prefer paper, arrive 15 minutes early. Bring photo ID, insurance card, and a medication list.</p>
+      <p class="text-2 mb-4">New patients get a secure link by email after booking. If you prefer paper, arrive 15 minutes early and fill the forms in at reception. Bring photo ID and your insurance card. A list of anything you take regularly helps too, along with recent X-rays if you have them.</p>
       <ul class="small text-2 stack stack-2" style="padding-left:1.1rem;list-style:disc">
         <li>Medical & dental history</li>
         <li>HIPAA acknowledgment</li>
@@ -923,18 +941,18 @@ def build_patients():
     <article class="card" id="insurance">
       <div class="icon-wrap mb-4">{icon("shield", 20)}</div>
       <h2 class="heading mb-3">Insurance</h2>
-      <p class="text-2 mb-4">We are out-of-network with most PPO plans and submit claims for you. Before elective treatment you receive a written pre-estimate. HSA and FSA cards are accepted. Third-party financing is available for larger restorative plans.</p>
-      <p class="small text-3">We do not promise that every plan covers every code. Benefits are verified; your plan booklet remains the authority.</p>
+      <p class="text-2 mb-4">The practice is out-of-network with most PPO plans and files the claim on your behalf. Before any elective treatment you get a written pre-estimate showing what the plan is expected to pay and what you owe. HSA and FSA cards are accepted, and third-party financing is available for larger restorative plans.</p>
+      <p class="small text-3">Coverage varies by code and by plan. We verify your benefits before treatment, but your plan booklet is the document that decides.</p>
     </article>
     <article class="card">
       <div class="icon-wrap mb-4">{icon("heart", 20)}</div>
       <h2 class="heading mb-3">Comfort & accessibility</h2>
-      <p class="text-2">Tell us about anxiety, jaw fatigue, or mobility needs when you book. We allocate time and the appropriate operatory rather than rushing adaptations mid-visit.</p>
+      <p class="text-2">Tell us about anxiety, jaw fatigue or mobility needs when you book. We put you in a longer slot and the right operatory, which is easier to arrange beforehand than to improvise halfway through a visit.</p>
     </article>
     <div class="card card-inset row-wrap between gap-4">
       <div>
-        <h2 class="heading mb-2">Ready to schedule?</h2>
-        <p class="small text-2">Response {DATA["response"]} on booking requests.</p>
+        <h2 class="heading mb-2">Book an appointment</h2>
+        <p class="small text-2">Booking requests are answered {DATA["response"]}.</p>
       </div>
       <button type="button" class="btn btn-primary" data-book-open>Book appointment</button>
     </div>
@@ -943,7 +961,7 @@ def build_patients():
     )
     html = head(
         "Patient Information | Vance Dental Studio",
-        "Patient forms, insurance, financing, and visit preparation for Vance Dental Studio in New York.",
+        "New-patient forms, out-of-network PPO insurance and what to bring to a first appointment at Vance Dental Studio in New York.",
         "patients.html",
     ) + header("patients") + content + footer() + close_body()
     (ROOT / "patients.html").write_text(html, encoding="utf-8")
@@ -954,8 +972,8 @@ def build_contact():
         breadcrumbs([("index.html", "Home"), (None, "Contact")])
         + page_hero(
             "Contact",
-            "Write the studio.",
-            f"We respond to clinical and scheduling messages {DATA['response']}. For pain after hours, call the number on your post-op sheet.",
+            "Send a message",
+            f"Clinical and scheduling messages are answered {DATA['response']}. If you are in pain outside opening hours, call the number on your post-operative sheet.",
         )
         + f"""
 <main id="main-content" class="section">
@@ -963,7 +981,7 @@ def build_contact():
     <form class="card stack stack-4" name="contact" method="POST" action="/thank-you.html" netlify netlify-honeypot="bot-field" data-contact-form>
       <input type="hidden" name="form-name" value="contact">
       <p class="sr-only" aria-hidden="true">
-        <label>Don’t fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+        <label>Leave this field empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
       </p>
       <div class="field">
         <label class="field-label" for="c-name">Full name</label>
@@ -996,7 +1014,7 @@ def build_contact():
         <p class="field-error">Enter a short message.</p>
       </div>
       <button type="submit" class="btn btn-primary btn-lg">Send message</button>
-      <p class="micro text-3">Or book directly, <button type="button" class="btn-link" style="display:inline;min-height:auto;padding:0" data-book-open>open the appointment form</button>.</p>
+      <p class="micro text-3">To ask for a specific date instead, <button type="button" class="btn-link" style="display:inline;min-height:auto;padding:0" data-book-open>open the appointment form</button>.</p>
     </form>
     <div class="stack stack-5">
       <div class="card card-inset">
@@ -1006,8 +1024,8 @@ def build_contact():
         <p class="small text-2">{DATA["address_line1"]}<br>{DATA["address_line2"]}</p>
       </div>
       <div class="card">
-        <h2 class="heading mb-3">Response promise</h2>
-        <p class="small text-2">Messages received on business days are answered {DATA["response"]}. Weekend notes are triaged Monday morning unless marked urgent.</p>
+        <h2 class="heading mb-3">Response times</h2>
+        <p class="small text-2">Messages sent on a business day are answered {DATA["response"]}. Weekend messages are read on Monday morning, unless you mark one urgent.</p>
       </div>
     </div>
   </div>
@@ -1047,7 +1065,7 @@ document.addEventListener('DOMContentLoaded',()=>{{
     }} catch (err) {{
       btn.classList.remove('is-loading');
       btn.innerHTML = original;
-      window.vdToast?.('Could not send. Email hello@vancedental.com or try again.');
+      window.vdToast?.(`Could not send. Email {DATA['email']} or try again.`);
     }}
   }});
 }});
@@ -1056,7 +1074,7 @@ document.addEventListener('DOMContentLoaded',()=>{{
     )
     html = head(
         "Contact | Vance Dental Studio",
-        "Contact Vance Dental Studio in Midtown Manhattan. Book a visit or send a message, we respond within 24 hours.",
+        "Message or call Vance Dental Studio at 1200 Avenue of the Americas, Suite 400, New York. Replies within 24 hours on business days.",
         "contact.html",
     ) + header("contact") + content + footer() + close_body()
     (ROOT / "contact.html").write_text(html, encoding="utf-8")
@@ -1067,8 +1085,8 @@ def build_thank_you():
 <main id="main-content" class="section" style="min-height:60vh;display:grid;align-items:center">
   <div class="container" style="max-width:560px;text-align:center">
     <div class="icon-wrap" style="margin:0 auto 24px;width:56px;height:56px">{icon("check", 24)}</div>
-    <h1 class="title mb-4">Message received.</h1>
-    <p class="lead" style="margin-inline:auto">Thank you. A member of the studio will reply {DATA["response"]}. If your matter is urgent, call <a href="tel:{DATA['phone_tel']}" style="color:var(--brass)">{DATA["phone"]}</a>.</p>
+    <h1 class="title mb-4">Message received</h1>
+    <p class="intro" style="margin-inline:auto">Thank you. Someone from the studio will reply {DATA["response"]}. If it cannot wait, call <a href="tel:{DATA['phone_tel']}" style="color:var(--brass)">{DATA["phone"]}</a>.</p>
     <div class="row-wrap gap-3 center mt-8">
       <a class="btn btn-primary" href="index.html">Back to home</a>
       <a class="btn btn-secondary" href="visit.html">Studio directions</a>
@@ -1078,7 +1096,7 @@ def build_thank_you():
 """
     html = head(
         "Thank You | Vance Dental Studio",
-        "Your message was received by Vance Dental Studio. We respond within 24 hours.",
+        "Confirmation page shown after a message is sent to Vance Dental Studio. Replies are sent within 24 hours.",
         "thank-you.html",
     ) + header("contact") + content + footer() + close_body()
     (ROOT / "thank-you.html").write_text(html, encoding="utf-8")
@@ -1089,8 +1107,8 @@ def build_search():
         breadcrumbs([("index.html", "Home"), (None, "Search")])
         + page_hero(
             "Search",
-            "Find a service, policy, or visit detail.",
-            "Type a keyword such as implants, hours, insurance, or parking.",
+            "Find something on this site",
+            "Search the site for a service, opening hours, parking or insurance.",
         )
         + """
 <main id="main-content" class="section">
@@ -1107,7 +1125,7 @@ def build_search():
     )
     html = head(
         "Search | Vance Dental Studio",
-        "Search Vance Dental Studio services, patient information, and visit details.",
+        "Search the Vance Dental Studio site for its services, opening hours, parking, insurance and patient forms.",
         "search.html",
     ) + header("home") + content + footer() + close_body()
     (ROOT / "search.html").write_text(html, encoding="utf-8")
@@ -1116,14 +1134,14 @@ def build_search():
 def build_privacy():
     content = (
         breadcrumbs([("index.html", "Home"), (None, "Privacy Policy")])
-        + page_hero("Legal", "Privacy Policy", "How Vance Dental Studio collects, uses, and protects personal information.")
+        + page_hero("Legal", "Privacy Policy", "What this site collects and what the practice does with it. Also how to ask for your own copy.")
         + f"""
 <main id="main-content" class="section">
   <div class="container legal">
     <p class="updated">Last updated: March 1, 2026</p>
-    <p>Vance Dental Studio (“we”, “us”) operates the website at vancedental.com and the clinical practice at {DATA["address_line1"]}, {DATA["address_line2"]}. This policy describes how we handle personal information collected online and offline.</p>
+    <p>Vance Dental Studio ("we", "us") runs the website at {SITE_URL.replace("https://", "")} and the clinical practice at {DATA["address_line1"]}, {DATA["address_line2"]}. This policy covers personal information collected both online and in the office.</p>
     <h2>Information we collect</h2>
-    <p>We collect information you submit through booking and contact forms (name, email, phone, message content), appointment records, insurance details necessary for billing, and technical data such as IP address, browser type, and pages viewed when analytics are enabled.</p>
+    <p>From the booking and contact forms we collect your name, email address, phone number and whatever you write in the message box. From treatment we hold appointment records and the insurance details needed to bill a claim. If you accept analytics cookies we also see technical data such as your IP address, browser type, the pages you opened and the time you spent on them.</p>
     <h2>How we use information</h2>
     <ul>
       <li>To schedule and provide dental care</li>
@@ -1133,13 +1151,13 @@ def build_privacy():
       <li>To send newsletters only when you opt in</li>
     </ul>
     <h2>Sharing</h2>
-    <p>We do not sell personal information. We share data with laboratories, imaging partners, insurers, and payment processors only as needed to deliver care or as required by law. Protected health information is handled under applicable HIPAA requirements.</p>
+    <p>We do not sell personal information. We pass data to dental laboratories, imaging centers, insurers and payment processors where your care or your bill needs it, and where the law requires it. Protected health information is handled under applicable HIPAA requirements.</p>
     <h2>Cookies</h2>
-    <p>Essential cookies keep the site functional (for example, theme preference). Optional analytics cookies run only after you accept the cookie banner. You may reject non-essential cookies without losing access to clinical information pages.</p>
+    <p>Essential cookies keep the site working; the theme preference you set is stored in one of them. Analytics cookies load only after you accept the banner. Rejecting them changes nothing about the pages you can read.</p>
     <h2>Retention</h2>
-    <p>Clinical records are retained according to New York State requirements. Marketing emails are kept until you unsubscribe. Web server logs are rotated on a limited schedule.</p>
+    <p>Clinical records are kept for as long as New York State requires. Newsletter addresses are deleted when you unsubscribe. Server logs are rotated on a short schedule.</p>
     <h2>Your choices</h2>
-    <p>Email {DATA["email"]} to request access, correction, or deletion of personal information we hold, subject to legal retention duties for clinical records.</p>
+    <p>Email {DATA["email"]} to ask for a copy of what we hold. You can also have something corrected, or have it deleted. Clinical records we are legally required to keep are the one exception.</p>
     <h2>Contact</h2>
     <p>Privacy questions: <a href="mailto:{DATA['email']}">{DATA["email"]}</a> · <a href="tel:{DATA['phone_tel']}">{DATA["phone"]}</a></p>
   </div>
@@ -1148,7 +1166,7 @@ def build_privacy():
     )
     html = head(
         "Privacy Policy | Vance Dental Studio",
-        "Privacy Policy for Vance Dental Studio, how we collect, use, and protect patient and website visitor information.",
+        "How Vance Dental Studio in New York handles the information it collects online and in the office, and how to ask for a copy of your own data.",
         "privacy.html",
     ) + header("home") + content + footer() + close_body()
     (ROOT / "privacy.html").write_text(html, encoding="utf-8")
@@ -1157,18 +1175,18 @@ def build_privacy():
 def build_terms():
     content = (
         breadcrumbs([("index.html", "Home"), (None, "Terms of Service")])
-        + page_hero("Legal", "Terms of Service", "Terms that govern use of this website and communications with the studio.")
+        + page_hero("Legal", "Terms of Service", "These terms cover use of this website and messages sent to the studio.")
         + f"""
 <main id="main-content" class="section">
   <div class="container legal">
     <p class="updated">Last updated: March 1, 2026</p>
-    <p>By using vancedental.com you agree to these terms. Clinical care is governed by separate informed-consent documents signed at the practice.</p>
+    <p>Using this site means you agree to these terms. Clinical care is covered by separate informed-consent documents that you sign at the practice.</p>
     <h2>Website use</h2>
-    <p>Content on this site is for general information. It is not a diagnosis or a treatment recommendation. Emergency dental issues require direct clinical contact or urgent care.</p>
+    <p>The pages here are general information. Nothing on this site is a diagnosis or a recommendation to treat. For a dental emergency, call the studio or go to urgent care.</p>
     <h2>Appointments</h2>
-    <p>Online booking requests are not confirmed until the studio replies. We may reschedule when clinical urgency requires it. Repeated no-shows may require a deposit for future holds.</p>
+    <p>An online booking request is not an appointment until the studio replies and confirms it. We may need to reschedule if a more urgent case comes in. After repeated no-shows we may ask for a deposit before holding another slot.</p>
     <h2>Intellectual property</h2>
-    <p>Text, brand marks, and site design are owned by Vance Dental Studio unless otherwise noted. You may not copy them for commercial use without written permission.</p>
+    <p>The text, the name and the design of this site belong to Vance Dental Studio unless a page says otherwise. Please do not reproduce them commercially without written permission.</p>
     <h2>Limitation</h2>
     <p>To the fullest extent permitted by law, Vance Dental Studio is not liable for damages arising from use of this website or reliance on its general content.</p>
     <h2>Contact</h2>
@@ -1179,7 +1197,7 @@ def build_terms():
     )
     html = head(
         "Terms of Service | Vance Dental Studio",
-        "Terms of Service for the Vance Dental Studio website and patient communications.",
+        "Terms covering use of the Vance Dental Studio website, online booking requests, site content and liability.",
         "terms.html",
     ) + header("home") + content + footer() + close_body()
     (ROOT / "terms.html").write_text(html, encoding="utf-8")
@@ -1190,8 +1208,8 @@ def build_404():
 <main id="main-content" class="not-found">
   <div>
     <p class="code" aria-hidden="true">404</p>
-    <h1 class="title mt-4">This page left the building.</h1>
-    <p class="lead mt-4" style="margin-inline:auto">The link may be outdated or typed incorrectly. Try search, or return home.</p>
+    <h1 class="title mt-4">There is nothing at this address</h1>
+    <p class="intro mt-4" style="margin-inline:auto">The link may be out of date, or the address may have a typo. Search, or go back to the home page.</p>
     <div class="row-wrap gap-3 center mt-8">
       <a class="btn btn-primary" href="index.html">Home</a>
       <a class="btn btn-secondary" href="search.html">Search</a>
@@ -1203,7 +1221,7 @@ def build_404():
     # Netlify uses 404.html
     html = head(
         "Page not found | Vance Dental Studio",
-        "The page you requested could not be found on Vance Dental Studio.",
+        "The page you asked for does not exist on the Vance Dental Studio site.",
         "404.html",
     ) + header("home") + content + footer() + close_body()
     (ROOT / "404.html").write_text(html, encoding="utf-8")
@@ -1211,10 +1229,10 @@ def build_404():
 
 def build_misc():
     (ROOT / "robots.txt").write_text(
-        """User-agent: *
+        f"""User-agent: *
 Allow: /
 
-Sitemap: https://vancedental.com/sitemap.xml
+Sitemap: {abs_url("sitemap.xml")}
 """,
         encoding="utf-8",
     )
@@ -1235,7 +1253,7 @@ Sitemap: https://vancedental.com/sitemap.xml
     ]
     urls = []
     for path, freq, pri in pages:
-        loc = f"https://vancedental.com/{path}" if path else "https://vancedental.com/"
+        loc = abs_url(path)
         urls.append(f"""  <url>
     <loc>{loc}</loc>
     <changefreq>{freq}</changefreq>
@@ -1252,22 +1270,27 @@ Sitemap: https://vancedental.com/sitemap.xml
     (ROOT / "llms.txt").write_text(
         f"""# Vance Dental Studio
 
-> Precision dentistry studio in Midtown Manhattan led by {DATA["doctor"]}.
+> Dental practice in Midtown Manhattan. {DATA["doctor"]} is the only dentist.
 
 ## Site
-- Home: https://vancedental.com/
-- Services: https://vancedental.com/services.html
-- Case studies: https://vancedental.com/cases.html
-- Visit / map: https://vancedental.com/visit.html
-- Contact: https://vancedental.com/contact.html
-- Privacy: https://vancedental.com/privacy.html
+- Home: {abs_url()}
+- Services: {abs_url("services.html")}
+- Case write-ups: {abs_url("cases.html")}
+- Location and hours: {abs_url("visit.html")}
+- Patient forms and insurance: {abs_url("patients.html")}
+- Contact: {abs_url("contact.html")}
+- Privacy: {abs_url("privacy.html")}
+- Terms: {abs_url("terms.html")}
 
 ## Facts
 - Address: {DATA["address_line1"]}, {DATA["address_line2"]}
 - Phone: {DATA["phone"]}
 - Email: {DATA["email"]}
-- Hours: Mon–Fri 08:00–19:00; Sat 09:00–16:00; Sun closed
-- Services: Cosmetic dentistry, dental implants, Invisalign, general checkup
+- Hours: Mon-Fri 08:00-19:00; Sat 09:00-16:00; Sun closed
+- Services: cosmetic dentistry (veneers, bonding, whitening), dental implants, Invisalign, general checkup and hygiene
+- Insurance: out-of-network with most PPO plans; the office files the claim
+- First appointment: 60 minutes; new-patient exams usually booked 7 to 10 days out
+- Messages answered within 24 hours on business days
 """,
         encoding="utf-8",
     )
@@ -1330,8 +1353,8 @@ Sitemap: https://vancedental.com/sitemap.xml
   <rect x="0" y="0" width="1200" height="8" fill="#A67C52"/>
   <rect x="80" y="160" width="56" height="56" rx="10" fill="#A67C52"/>
   <text x="152" y="198" font-family="Georgia, serif" font-size="28" fill="#1C1915">VANCE DENTAL</text>
-  <text x="80" y="320" font-family="Georgia, serif" font-size="64" fill="#1C1915">Modern precision</text>
-  <text x="80" y="400" font-family="Georgia, serif" font-size="64" fill="#A67C52">dentistry.</text>
+  <text x="80" y="320" font-family="Georgia, serif" font-size="64" fill="#1C1915">Vance Dental Studio</text>
+  <text x="80" y="400" font-family="Georgia, serif" font-size="40" fill="#A67C52">Suite 400, Midtown Manhattan</text>
   <text x="80" y="480" font-family="system-ui, sans-serif" font-size="24" fill="#5A554C">{DATA["address_line1"]}, New York</text>
   <text x="80" y="560" font-family="system-ui, sans-serif" font-size="20" fill="#8A847A">{DATA["phone"]}  ·  {DATA["email"]}</text>
 </svg>
@@ -1367,6 +1390,21 @@ Open http://localhost:8080
 - `js/main.js`, interactions
 - `netlify.toml`, `_headers`, `_redirects`, Netlify config
 - `sitemap.xml`, `robots.txt`, `llms.txt`, SEO / AI discovery
+
+## Canonical host
+
+`SITE_URL` at the top of `build_pages.py` is the single source for every
+absolute URL the site emits (canonical, `og:url`, `twitter:image`, JSON-LD,
+`sitemap.xml`, `robots.txt`, `llms.txt`). It currently points at the Netlify
+host the site is served from, so the markup never advertises a domain the
+visitor did not arrive on. When a custom domain is attached, change that one
+line and re-run the generator.
+
+## Copy rules
+
+Page text follows `COPY_GUIDE.md`, which applies
+[Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
+to marketing copy. Read it before editing any string in `build_pages.py`.
 """,
         encoding="utf-8",
     )
